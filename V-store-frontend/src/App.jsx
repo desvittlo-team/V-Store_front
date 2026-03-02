@@ -19,6 +19,7 @@ export default function App() {
         <Route path="/" element={<GamesPage />} />
         <Route path="/login" element={<LoginPage setUser={setUser} />} />
         <Route path="/register" element={<RegisterPage setUser={setUser} />} />
+        <Route path="/" element={<GamesPage user={user} />} />
         <Route
           path="/admin"
           element={user?.role === "Admin" ? <AdminPage user={user} /> : <Navigate to="/" />}

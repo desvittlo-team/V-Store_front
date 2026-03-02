@@ -40,3 +40,17 @@ export async function deleteGame(id, token) {
   });
   if (!res.ok) throw new Error("Ошибка удаления");
 }
+
+export async function uploadPhoto(file, token) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch(`${API}/admin/games/upload`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Ошибка загрузки");
+  return data.fileName;
+}
