@@ -7,8 +7,9 @@ export default function AdminPage({ user }) {
   const [games, setGames] = useState([]);
   const [form, setForm] = useState(empty);
   const [editId, setEditId] = useState(null);
-  const [error, setError] = useState("");
   const [photoFile, setPhotoFile] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     getGames().then(setGames);
@@ -18,41 +19,11 @@ export default function AdminPage({ user }) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setError("");
-    try {
-      let photoName = form.photo;
-
-      if (photoFile) {
-        const formData = new FormData();
-        formData.append("file", photoFile);
-
-        const res = await fetch("https://localhost:7059/api/admin/upload", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${user.token}` },
-          body: formData,
-        });
-        const data = await res.json();
-        photoName = data.fileName;
-      }
-
-      const gameData = { ...form, photo: photoName };
-
-      if (editId) {
-        const updated = await updateGame(editId, gameData, user.token);
-        setGames(games.map((g) => (g.id === editId ? updated : g)));
-        setEditId(null);
-      } else {
-        const created = await addGame(gameData, user.token);
-        setGames([...games, created]);
-      }
-
-      setForm(empty);
-      setPhotoFile(null);
-    } catch (err) {
-      setError(err.message);
-    }
+  function handlePhotoChange(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setPhotoFile(file);
+    setPreview(URL.createObjectURL(file));
   }
 
   function handleEdit(game) {
@@ -64,12 +35,63 @@ export default function AdminPage({ user }) {
       gpa: game.gpa,
       photo: game.photo,
     });
+    setPreview(`https://localhost:7059/images/${game.photo}`);
+    setPhotoFile(null);
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError("");
+
+    const token = user?.token || user?.Token;
+    console.log("user:", user);
+    console.log("token:", token);
+
+    if (!token) {
+      setError("Не авторизован. Войдите заново.");
+      return;
+    }
+
+    try {
+      let photoName = form.photo;
+
+      if (photoFile) {
+        const formData = new FormData();
+        formData.append("file", photoFile);
+        const res = await fetch("https://localhost:7059/api/admin/upload", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        });
+        if (!res.ok) throw new Error("Ошибка загрузки фото");
+        const data = await res.json();
+        photoName = data.fileName;
+      }
+
+      const gameData = { ...form, photo: photoName };
+
+      if (editId) {
+        const updated = await updateGame(editId, gameData, token);
+        setGames(games.map((g) => (g.id === editId ? updated : g)));
+        setEditId(null);
+      } else {
+        const created = await addGame(gameData, token);
+        setGames([...games, created]);
+      }
+
+      setForm(empty);
+      setPreview(null);
+      setPhotoFile(null);
+    } catch (err) {
+      setError(err.message);
+    }
   }
 
   async function handleDelete(id) {
     if (!confirm("Удалить игру?")) return;
+    const token = user?.token || user?.Token;
     try {
-      await deleteGame(id, user.token);
+      await deleteGame(id, token);
       setGames(games.filter((g) => g.id !== id));
     } catch (err) {
       setError(err.message);
@@ -87,15 +109,18 @@ export default function AdminPage({ user }) {
         <input name="surname" placeholder="Разработчик" value={form.surname} onChange={handleChange} required />
         <input name="age" type="number" placeholder="Возраст" value={form.age} onChange={handleChange} />
         <input name="gpa" type="number" step="0.1" placeholder="Рейтинг" value={form.gpa} onChange={handleChange} />
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setPhotoFile(e.target.files[0])}
-        />
+
+        <label className="photo-label" style={{ cursor: "pointer", border: "1px dashed #555", padding: "10px", borderRadius: "6px", textAlign: "center" }}>
+          {preview
+            ? <img src={preview} alt="preview" style={{ width: "100%", maxHeight: "150px", objectFit: "cover", borderRadius: "6px" }} />
+            : <span>Нажми чтобы выбрать фото</span>}
+          <input type="file" accept="image/*" onChange={handlePhotoChange} style={{ display: "none" }} />
+        </label>
+
         <div className="form-buttons">
           <button type="submit">{editId ? "Сохранить" : "Добавить"}</button>
           {editId && (
-            <button type="button" onClick={() => { setEditId(null); setForm(empty); }}>
+            <button type="button" onClick={() => { setEditId(null); setForm(empty); setPreview(null); }}>
               Отмена
             </button>
           )}
@@ -106,10 +131,10 @@ export default function AdminPage({ user }) {
         <thead>
           <tr>
             <th>ID</th>
+            <th>Фото</th>
             <th>Название</th>
             <th>Разработчик</th>
             <th>Рейтинг</th>
-            <th>Фото</th>
             <th>Действия</th>
           </tr>
         </thead>
@@ -117,17 +142,17 @@ export default function AdminPage({ user }) {
           {games.map((game) => (
             <tr key={game.id}>
               <td>{game.id}</td>
-              <td>{game.name}</td>
-              <td>{game.surname}</td>
-              <td>{game.gpa}</td>
               <td>
                 <img
-                  src={`https://localhost:7059/pics/${game.photo}`}
+                  src={`https://localhost:7059/images/${game.photo}`}
                   alt={game.name}
                   width={60}
                   onError={(e) => (e.target.style.display = "none")}
                 />
               </td>
+              <td>{game.name}</td>
+              <td>{game.surname}</td>
+              <td>{game.gpa}</td>
               <td>
                 <button onClick={() => handleEdit(game)}>✏️</button>
                 <button onClick={() => handleDelete(game.id)}>🗑️</button>

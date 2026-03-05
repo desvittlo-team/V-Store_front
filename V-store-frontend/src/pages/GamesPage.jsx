@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getGames, addGame, updateGame, deleteGame, uploadPhoto } from "../api/games";
+import { getGames, addGame, updateGame, deleteGame } from "../api/games";
 
 const empty = { name: "", surname: "", age: 0, gpa: 0, photo: "" };
 
@@ -35,26 +35,50 @@ export default function AdminPage({ user }) {
       gpa: game.gpa,
       photo: game.photo,
     });
-    setPreview(`http://localhost:7059/pics/${game.photo}`);
+    setPreview(`https://localhost:7059/images/${game.photo}`);
     setPhotoFile(null);
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+
+    const token = user?.token || user?.Token;
+    console.log("user:", user);
+    console.log("token:", token);
+
+    if (!token) {
+      setError("Не авторизован. Войдите заново.");
+      return;
+    }
+
     try {
-      let photo = form.photo;
+      let photoName = form.photo;
+
       if (photoFile) {
-        photo = await uploadPhoto(photoFile, user.token);
+        const formData = new FormData();
+        formData.append("file", photoFile);
+        const res = await fetch("https://localhost:7059/api/admin/upload", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        });
+        if (!res.ok) throw new Error("Ошибка загрузки фото");
+        const data = await res.json();
+        photoName = data.fileName;
       }
+
+      const gameData = { ...form, photo: photoName };
+
       if (editId) {
-        const updated = await updateGame(editId, { ...form, photo }, user.token);
+        const updated = await updateGame(editId, gameData, token);
         setGames(games.map((g) => (g.id === editId ? updated : g)));
         setEditId(null);
       } else {
-        const created = await addGame({ ...form, photo }, user.token);
+        const created = await addGame(gameData, token);
         setGames([...games, created]);
       }
+
       setForm(empty);
       setPreview(null);
       setPhotoFile(null);
@@ -65,8 +89,9 @@ export default function AdminPage({ user }) {
 
   async function handleDelete(id) {
     if (!confirm("Удалить игру?")) return;
+    const token = user?.token || user?.Token;
     try {
-      await deleteGame(id, user.token);
+      await deleteGame(id, token);
       setGames(games.filter((g) => g.id !== id));
     } catch (err) {
       setError(err.message);
@@ -85,11 +110,10 @@ export default function AdminPage({ user }) {
         <input name="age" type="number" placeholder="Возраст" value={form.age} onChange={handleChange} />
         <input name="gpa" type="number" step="0.1" placeholder="Рейтинг" value={form.gpa} onChange={handleChange} />
 
-        <label className="photo-label">
+        <label className="photo-label" style={{ cursor: "pointer", border: "1px dashed #555", padding: "10px", borderRadius: "6px", textAlign: "center" }}>
           {preview
-            ? <img src={preview} alt="preview" className="photo-preview" />
-            : <span>Выбрать фото</span>
-          }
+            ? <img src={preview} alt="preview" style={{ width: "100%", maxHeight: "150px", objectFit: "cover", borderRadius: "6px" }} />
+            : <span>Нажми чтобы выбрать фото</span>}
           <input type="file" accept="image/*" onChange={handlePhotoChange} style={{ display: "none" }} />
         </label>
 
@@ -119,11 +143,12 @@ export default function AdminPage({ user }) {
             <tr key={game.id}>
               <td>{game.id}</td>
               <td>
-              <img
-                src={`https://localhost:7059/images/${game.photo}`}
-                alt={game.name}
-                onError={(e) => (e.target.src = "/placeholder.png")}
-              />
+                <img
+                  src={`https://localhost:7059/images/${game.photo}`}
+                  alt={game.name}
+                  width={60}
+                  onError={(e) => (e.target.style.display = "none")}
+                />
               </td>
               <td>{game.name}</td>
               <td>{game.surname}</td>
