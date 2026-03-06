@@ -1,166 +1,60 @@
 import { useEffect, useState } from "react";
-import { getGames, addGame, updateGame, deleteGame } from "../api/games";
+import { getGames, deleteGame } from "../api/games";
+import { useNavigate } from "react-router-dom";
 
-const empty = { name: "", surname: "", age: 0, gpa: 0, photo: "" };
-
-export default function AdminPage({ user }) {
+export default function GamesPage({ user }) {
   const [games, setGames] = useState([]);
-  const [form, setForm] = useState(empty);
-  const [editId, setEditId] = useState(null);
-  const [photoFile, setPhotoFile] = useState(null);
-  const [preview, setPreview] = useState(null);
-  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    getGames().then(setGames);
+    getGames()
+      .then(setGames)
+      .finally(() => setLoading(false));
   }, []);
-
-  function handleChange(e) {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  }
-
-  function handlePhotoChange(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    setPhotoFile(file);
-    setPreview(URL.createObjectURL(file));
-  }
-
-  function handleEdit(game) {
-    setEditId(game.id);
-    setForm({
-      name: game.name,
-      surname: game.surname,
-      age: game.age,
-      gpa: game.gpa,
-      photo: game.photo,
-    });
-    setPreview(`https://localhost:7059/images/${game.photo}`);
-    setPhotoFile(null);
-  }
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setError("");
-
-    const token = user?.token || user?.Token;
-    console.log("user:", user);
-    console.log("token:", token);
-
-    if (!token) {
-      setError("Не авторизован. Войдите заново.");
-      return;
-    }
-
-    try {
-      let photoName = form.photo;
-
-      if (photoFile) {
-        const formData = new FormData();
-        formData.append("file", photoFile);
-        const res = await fetch("https://localhost:7059/api/admin/upload", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData,
-        });
-        if (!res.ok) throw new Error("Ошибка загрузки фото");
-        const data = await res.json();
-        photoName = data.fileName;
-      }
-
-      const gameData = { ...form, photo: photoName };
-
-      if (editId) {
-        const updated = await updateGame(editId, gameData, token);
-        setGames(games.map((g) => (g.id === editId ? updated : g)));
-        setEditId(null);
-      } else {
-        const created = await addGame(gameData, token);
-        setGames([...games, created]);
-      }
-
-      setForm(empty);
-      setPreview(null);
-      setPhotoFile(null);
-    } catch (err) {
-      setError(err.message);
-    }
-  }
 
   async function handleDelete(id) {
     if (!confirm("Удалить игру?")) return;
-    const token = user?.token || user?.Token;
+    const token = user?.token;
     try {
       await deleteGame(id, token);
       setGames(games.filter((g) => g.id !== id));
     } catch (err) {
-      setError(err.message);
+      alert(err.message);
     }
   }
 
+  if (loading) return <p className="loading">Загрузка...</p>;
+
   return (
-    <div className="admin-page">
-      <h1>Админ панель</h1>
-      {error && <p className="error">{error}</p>}
-
-      <form className="admin-form" onSubmit={handleSubmit}>
-        <h2>{editId ? "Редактировать игру" : "Добавить игру"}</h2>
-        <input name="name" placeholder="Название" value={form.name} onChange={handleChange} required />
-        <input name="surname" placeholder="Разработчик" value={form.surname} onChange={handleChange} required />
-        <input name="age" type="number" placeholder="Возраст" value={form.age} onChange={handleChange} />
-        <input name="gpa" type="number" step="0.1" placeholder="Рейтинг" value={form.gpa} onChange={handleChange} />
-
-        <label className="photo-label" style={{ cursor: "pointer", border: "1px dashed #555", padding: "10px", borderRadius: "6px", textAlign: "center" }}>
-          {preview
-            ? <img src={preview} alt="preview" style={{ width: "100%", maxHeight: "150px", objectFit: "cover", borderRadius: "6px" }} />
-            : <span>Нажми чтобы выбрать фото</span>}
-          <input type="file" accept="image/*" onChange={handlePhotoChange} style={{ display: "none" }} />
-        </label>
-
-        <div className="form-buttons">
-          <button type="submit">{editId ? "Сохранить" : "Добавить"}</button>
-          {editId && (
-            <button type="button" onClick={() => { setEditId(null); setForm(empty); setPreview(null); }}>
-              Отмена
-            </button>
-          )}
-        </div>
-      </form>
-
-      <table className="admin-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Фото</th>
-            <th>Название</th>
-            <th>Разработчик</th>
-            <th>Рейтинг</th>
-            <th>Действия</th>
-          </tr>
-        </thead>
-        <tbody>
-          {games.map((game) => (
-            <tr key={game.id}>
-              <td>{game.id}</td>
-              <td>
+    <div className="games-page">
+      <h1>Каталог игр</h1>
+      {user?.role === "Admin" && (
+        <button onClick={() => navigate("/admin")} style={{ marginBottom: "20px", padding: "10px 20px", background: "#7c3aed", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}>
+          + Добавить игру
+        </button>
+      )}
+      <div className="games-grid">
+        {games.map((game) => (
+          <div className="game-card" key={game.id}>
                 <img
                   src={`https://localhost:7059/images/${game.photo}`}
                   alt={game.name}
                   width={60}
                   onError={(e) => (e.target.style.display = "none")}
                 />
-              </td>
-              <td>{game.name}</td>
-              <td>{game.surname}</td>
-              <td>{game.gpa}</td>
-              <td>
-                <button onClick={() => handleEdit(game)}>✏️</button>
+            <h3>{game.name}</h3>
+            <p>{game.surname}</p>
+            <span>⭐ {game.gpa}</span>
+            {user?.role === "Admin" && (
+              <div style={{ padding: "8px 12px", display: "flex", gap: "8px" }}>
+                <button onClick={() => navigate(`/admin?edit=${game.id}`)}>✏️</button>
                 <button onClick={() => handleDelete(game.id)}>🗑️</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

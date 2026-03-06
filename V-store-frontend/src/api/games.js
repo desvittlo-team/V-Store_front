@@ -45,7 +45,7 @@ export async function uploadPhoto(file, token) {
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await fetch(`${API}/admin/games/upload`, {
+  const res = await fetch(`${API}/admin/upload`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
     body: formData,

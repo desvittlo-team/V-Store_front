@@ -35,17 +35,14 @@ export default function AdminPage({ user }) {
       gpa: game.gpa,
       photo: game.photo,
     });
-    setPreview(`https://localhost:7059/images/${game.photo}`);
+    setPreview(`https://localhost:7059/pics/${game.photo}`);
     setPhotoFile(null);
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
-
-    const token = user?.token || user?.Token;
-    console.log("user:", user);
-    console.log("token:", token);
+    const token = user?.token;
 
     if (!token) {
       setError("Не авторизован. Войдите заново.");
@@ -89,7 +86,7 @@ export default function AdminPage({ user }) {
 
   async function handleDelete(id) {
     if (!confirm("Удалить игру?")) return;
-    const token = user?.token || user?.Token;
+    const token = user?.token;
     try {
       await deleteGame(id, token);
       setGames(games.filter((g) => g.id !== id));
