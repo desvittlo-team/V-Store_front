@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import GamesPage from "./pages/GamesPage";
 import AdminPage from "./pages/AdminPage";
+import GameDetailsPage from "./pages/GameDetailsPage";
 
 export default function App() {
   const [user, setUser] = useState(() => {
@@ -15,15 +17,21 @@ export default function App() {
   return (
     <BrowserRouter>
       <Navbar user={user} setUser={setUser} />
-      <Routes>
-        <Route path="/" element={<GamesPage user={user} />} />
-        <Route path="/login" element={<LoginPage setUser={setUser} />} />
-        <Route path="/register" element={<RegisterPage setUser={setUser} />} />
-        <Route
-          path="/admin"
-          element={user?.role === "Admin" ? <AdminPage user={user} /> : <Navigate to="/" />}
-        />
-      </Routes>
+      
+      <div className="page-content"> 
+        <Routes>
+          <Route path="/" element={<GamesPage user={user} />} />
+          <Route path="/login" element={<LoginPage setUser={setUser} />} />
+          <Route path="/register" element={<RegisterPage setUser={setUser} />} />
+          <Route path="/game/:id" element={<GameDetailsPage user={user} />} />
+          <Route
+            path="/admin"
+            element={user?.role === "Admin" ? <AdminPage user={user} /> : <Navigate to="/" />}
+          />
+        </Routes>
+      </div>
+
+      <Footer />
     </BrowserRouter>
   );
 }
