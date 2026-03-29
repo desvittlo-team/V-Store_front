@@ -145,7 +145,10 @@ export default function ScreenshotsPage({ user }) {
                   src={`https://localhost:7059/screenshots/${s.fileName}`}
                   alt={s.caption || "screenshot"}
                   style={{ width: "100%", height: "160px", objectFit: "cover", display: "block" }}
-                  onError={e => { e.target.src = "https://via.placeholder.com/260x160?text=No+Image"; }}
+                  onError={(e) => {
+                    if (e.currentTarget.src.includes("no-image")) return;
+                    e.currentTarget.src = "/no-image.png"; // локальная картинка
+                  }}
                 />
                 <div style={{
                   position: "absolute", inset: 0, background: "rgba(0,0,0,0)",
