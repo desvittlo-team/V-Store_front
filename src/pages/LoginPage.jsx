@@ -13,6 +13,7 @@ export default function LoginPage({ setUser }) {
     setError("");
     try {
       const data = await login(email, password);
+      console.log("response:", data);
       localStorage.setItem("user", JSON.stringify(data));
       setUser(data);
       navigate("/");
