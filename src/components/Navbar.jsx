@@ -47,9 +47,9 @@ export default function Navbar({ user, setUser, balance, setBalance }) {
           <div className="nav-center">
             <Link to="/" className={`nav-item ${location.pathname === '/' ? 'active' : ''}`}>Крамниця</Link>
             <Link to="/library" className={`nav-item ${location.pathname === '/library' ? 'active' : ''}`}>Бібліотека</Link>
-           <Link to="/users" className={`nav-item ${location.pathname === '/users' ? 'active' : ''}`}>
-            Гравці
-          </Link>
+            <Link to="/users" className={`nav-item ${location.pathname === '/users' ? 'active' : ''}`}>
+              Сommunity
+            </Link>
             <Link to="/screenshots" className={`nav-item ${location.pathname === '/screenshots' ? 'active' : ''}`}>
               Скриншоти
             </Link>
