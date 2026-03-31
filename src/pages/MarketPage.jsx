@@ -1,5 +1,4 @@
-import { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 const API = "https://localhost:7059/api/market";
 
@@ -8,6 +7,7 @@ export default function MarketPage({ user, onPurchase }) {
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [showInventorySell, setShowInventorySell] = useState(false);
   const [selected, setSelected] = useState(null);
   const [message, setMessage] = useState("");
   const [search, setSearch] = useState("");
@@ -16,12 +16,12 @@ export default function MarketPage({ user, onPurchase }) {
   const [photoFile, setPhotoFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const fileRef = useRef();
-  const navigate = useNavigate();
+  const [myInventory, setMyInventory] = useState([]);
+  const [sellPrice, setSellPrice] = useState("");
+  const [selectedInvItem, setSelectedInvItem] = useState(null);
 
   const headers = { Authorization: `Bearer ${user?.token}` };
 
-  
   useEffect(() => {
     fetch(API)
       .then(r => r.json())
@@ -33,9 +33,18 @@ export default function MarketPage({ user, onPurchase }) {
       .then(setGames);
   }, []);
 
+  useEffect(() => {
+    if (showInventorySell && user?.token) loadMyInventory();
+  }, [showInventorySell]);
+
   function showMsg(msg) {
     setMessage(msg);
     setTimeout(() => setMessage(""), 3000);
+  }
+
+  async function loadMyInventory() {
+    const res = await fetch(`${API}/inventory/my`, { headers });
+    if (res.ok) setMyInventory(await res.json());
   }
 
   async function handleSell(e) {
@@ -97,6 +106,22 @@ export default function MarketPage({ user, onPurchase }) {
     }
   }
 
+  async function handleSellFromInventory() {
+    if (!selectedInvItem || !sellPrice) return;
+    const res = await fetch(`${API}/inventory/${selectedInvItem}/sell`, {
+      method: "POST",
+      headers: { ...headers, "Content-Type": "application/json" },
+      body: JSON.stringify({ price: parseFloat(sellPrice) })
+    });
+    const data = await res.json();
+    if (!res.ok) { showMsg(`❌ ${data.message}`); return; }
+    showMsg("✅ Предмет виставлено на продаж!");
+    setShowInventorySell(false);
+    setSellPrice("");
+    setSelectedInvItem(null);
+    fetch(API).then(r => r.json()).then(setItems);
+  }
+
   const filtered = items.filter(i => {
     const matchSearch = i.name.toLowerCase().includes(search.toLowerCase());
     const matchGame = filterGame ? i.game.id === parseInt(filterGame) : true;
@@ -108,6 +133,7 @@ export default function MarketPage({ user, onPurchase }) {
   return (
     <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "32px 16px" }}>
 
+      {/* Уведомление */}
       {message && (
         <div style={{
           position: "fixed", top: "80px", left: "50%", transform: "translateX(-50%)",
@@ -146,7 +172,9 @@ export default function MarketPage({ user, onPurchase }) {
             <option value="">Всі ігри</option>
             {games.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
           </select>
-          {user && (
+
+          {/* Кнопка админа — создать предмет */}
+          {user?.role === "Admin" && (
             <button
               onClick={() => setShowForm(!showForm)}
               style={{
@@ -154,19 +182,32 @@ export default function MarketPage({ user, onPurchase }) {
                 border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "14px"
               }}
             >
-              + Продати предмет
+              + Створити предмет
+            </button>
+          )}
+
+          {/* Кнопка юзера — продать из инвентаря */}
+          {user && user.role !== "Admin" && (
+            <button
+              onClick={() => setShowInventorySell(true)}
+              style={{
+                padding: "10px 20px", background: "#2a2a3e", color: "#fff",
+                border: "1px solid #7c3aed", borderRadius: "8px", cursor: "pointer", fontSize: "14px"
+              }}
+            >
+              🎒 Продати з інвентаря
             </button>
           )}
         </div>
       </div>
 
-      {/* Форма выставления */}
-      {showForm && (
+      {/* Форма создания предмета (только админ) */}
+      {showForm && user?.role === "Admin" && (
         <div style={{
           background: "#1a1a2e", borderRadius: "12px", padding: "24px",
           border: "1px solid #2a2a3e", marginBottom: "24px"
         }}>
-          <h2 style={{ color: "#fff", marginBottom: "20px", fontSize: "18px" }}>Виставити предмет</h2>
+          <h2 style={{ color: "#fff", marginBottom: "20px", fontSize: "18px" }}>Створити предмет</h2>
           <form onSubmit={handleSell} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
             <input
               placeholder="Назва предмета *"
@@ -226,7 +267,7 @@ export default function MarketPage({ user, onPurchase }) {
                   opacity: uploading ? 0.6 : 1
                 }}
               >
-                {uploading ? "Завантаження..." : "Виставити"}
+                {uploading ? "Завантаження..." : "Створити"}
               </button>
               <button
                 type="button"
@@ -341,6 +382,95 @@ export default function MarketPage({ user, onPurchase }) {
                 Закрити
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Модальное окно продажи из инвентаря */}
+      {showInventorySell && (
+        <div
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}
+          onClick={() => setShowInventorySell(false)}
+        >
+          <div
+            style={{ background: "#1a1a2e", borderRadius: "14px", padding: "28px", width: "460px", maxWidth: "90vw" }}
+            onClick={e => e.stopPropagation()}
+          >
+            <h2 style={{ color: "#fff", marginBottom: "20px" }}>🎒 Продати з інвентаря</h2>
+
+            {myInventory.length === 0 ? (
+              <div>
+                <p style={{ color: "#666", textAlign: "center", marginBottom: "16px" }}>
+                  Інвентар порожній — спочатку купіть предмети на маркеті
+                </p>
+                <button
+                  onClick={() => setShowInventorySell(false)}
+                  style={{ width: "100%", padding: "10px", background: "transparent", border: "1px solid #333", color: "#aaa", borderRadius: "8px", cursor: "pointer" }}
+                >
+                  Закрити
+                </button>
+              </div>
+            ) : (
+              <>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px", marginBottom: "16px", maxHeight: "240px", overflowY: "auto" }}>
+                  {myInventory.map(ii => (
+                    <div
+                      key={ii.id}
+                      onClick={() => setSelectedInvItem(ii.id)}
+                      style={{
+                        background: selectedInvItem === ii.id ? "#7c3aed" : "#2a2a3e",
+                        borderRadius: "8px", padding: "10px", cursor: "pointer",
+                        border: selectedInvItem === ii.id ? "2px solid #a855f7" : "2px solid transparent",
+                        textAlign: "center"
+                      }}
+                    >
+                      {ii.item.photo && ii.item.photo !== "default_item.png" ? (
+                        <img
+                          src={`https://localhost:7059/items/${ii.item.photo}`}
+                          alt={ii.item.name}
+                          style={{ width: "100%", height: "60px", objectFit: "cover", borderRadius: "4px", marginBottom: "6px" }}
+                          onError={e => e.target.style.display = "none"}
+                        />
+                      ) : (
+                        <div style={{ fontSize: "28px", marginBottom: "6px" }}>🎮</div>
+                      )}
+                      <p style={{ color: "#fff", fontSize: "11px", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ii.item.name}</p>
+                      <p style={{ color: "#666", fontSize: "10px", margin: "2px 0 0" }}>{ii.item.game.name}</p>
+                    </div>
+                  ))}
+                </div>
+                <input
+                  type="number"
+                  placeholder="Ваша ціна ($)"
+                  value={sellPrice}
+                  onChange={e => setSellPrice(e.target.value)}
+                  min="0.01"
+                  step="0.01"
+                  style={{
+                    width: "100%", padding: "10px 14px", borderRadius: "8px",
+                    background: "#2a2a3e", border: "1px solid #333", color: "#fff",
+                    marginBottom: "16px", boxSizing: "border-box", outline: "none"
+                  }}
+                />
+                <button
+                  onClick={handleSellFromInventory}
+                  disabled={!selectedInvItem || !sellPrice}
+                  style={{
+                    width: "100%", padding: "12px", background: "#7c3aed", color: "#fff",
+                    border: "none", borderRadius: "8px", cursor: "pointer", marginBottom: "8px",
+                    opacity: selectedInvItem && sellPrice ? 1 : 0.4
+                  }}
+                >
+                  Виставити на продаж
+                </button>
+                <button
+                  onClick={() => setShowInventorySell(false)}
+                  style={{ width: "100%", padding: "10px", background: "transparent", border: "1px solid #333", color: "#aaa", borderRadius: "8px", cursor: "pointer" }}
+                >
+                  Закрити
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
