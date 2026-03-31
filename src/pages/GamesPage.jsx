@@ -121,15 +121,7 @@ export default function GamesPage({ user, setUser }) {
               <p className="banner-desc">Найкраща пропозиція тижня вже у крамниці.</p>
               <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
                 <button className="buy-btn" onClick={() => setSelectedGame(heroGame)}>Детальніше</button>
-                {user && (
-                  <button
-                    className="buy-btn"
-                    style={{ background: "transparent", border: "1px solid #7c3aed" }}
-                    onClick={() => setShowTopup(true)}
-                  >
-                    💰 {balance !== null ? `${parseFloat(balance).toFixed(2)}$` : "Баланс"}
-                  </button>
-                )}
+
               </div>
             </div>
           </div>

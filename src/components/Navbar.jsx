@@ -53,9 +53,18 @@ export default function Navbar({ user, setUser, balance, setBalance }) {
             <Link to="/screenshots" className={`nav-item ${location.pathname === '/screenshots' ? 'active' : ''}`}>
               Скриншоти
             </Link>
+            {user && (
+              <Link to={`/profile/${user.id}`}>
+                {user.username}
+              </Link>
+            )}
+            <Link to="/market" className={`nav-item ${location.pathname === '/market' ? 'active' : ''}`}>
+                🛒 Маркет
+              </Link>
             {user?.role === "Admin" && (
               <Link to="/admin" className={`nav-item ${location.pathname === '/admin' ? 'active' : ''}`}>Адмін</Link>
             )}
+
           </div>
           <div className="nav-right">
             {user ? (
