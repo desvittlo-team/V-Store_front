@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .placeholder-bg { fill: #2a2a3e; }
+      .placeholder-icon { fill: #666; }
+      .placeholder-text { fill: #999; font-family: Arial, sans-serif; font-size: 14px; text-anchor: middle; }
+    </style>
+  </defs>
+  <rect class="placeholder-bg" width="200" height="200"/>
+  <circle class="placeholder-icon" cx="100" cy="70" r="25"/>
+  <path class="placeholder-icon" d="M 200 200 L 0 200 L 0 100 Q 0 80 20 80 L 180 80 Q 200 80 200 100 Z"/>
+  <text class="placeholder-text" x="100" y="140">Image</text>
+  <text class="placeholder-text" x="100" y="160" style="font-size: 12px;">Not Available</text>
+</svg>
