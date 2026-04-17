@@ -1,20 +1,25 @@
+// ChatPage.jsx — головний файл: збирає UserList, PrivateChat, GlobalChat
+// Перемикання між "Особисті" та "Глобальний" вкладками
+
 import { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import { IMAGE_ENDPOINTS, FALLBACK_IMAGE } from "../api/imageHelper";
+import UserList from "../components/chat/UserList";
+import PrivateChat from "../components/chat/PrivateChat";
+import GlobalChat from "../components/chat/GlobalChat";
 
 const API = "https://localhost:7059/api/chat";
 
 export default function ChatPage({ user }) {
+  const [tab, setTab] = useState("private"); // "private" | "global"
+
   const [conversations, setConversations] = useState([]);
   const [activePartner, setActivePartner] = useState(null);
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
   const [search, setSearch] = useState("");
   const [allUsers, setAllUsers] = useState([]);
-  const [searchResults, setSearchResults] = useState([]);
   const [viewImage, setViewImage] = useState(null);
 
-  const messagesEndRef = useRef();
   const pollRef = useRef();
   const fileInputRef = useRef();
   const location = useLocation();
@@ -32,29 +37,24 @@ export default function ChatPage({ user }) {
     if (res.ok) setMessages(await res.json());
   }
 
-  async function loadAllUsers() {
-    if (!user?.token) return;
-    const res = await fetch("https://localhost:7059/api/users", { headers });
-    if (res.ok) {
-      const data = await res.json();
-      setAllUsers(data.filter(u => u.id !== user.id));
-    }
-  }
-
-  useEffect(() => {
+  async function searchUsers(query) {
+  if (!query || query.length < 2) { setAllUsers([]); return; }
+  const res = await fetch(`${API}/search?q=${encodeURIComponent(query)}`, { headers });
+  if (res.ok) setAllUsers(await res.json());
+}
+    useEffect(() => {
     loadConversations();
-    loadAllUsers();
   }, [user]);
-
   useEffect(() => {
     if (location.state?.partnerId) {
       setActivePartner({ id: location.state.partnerId, username: location.state.partnerUsername, photo: "" });
+      setTab("private");
     }
   }, [location.state]);
 
   useEffect(() => {
     clearInterval(pollRef.current);
-    if (activePartner) {
+    if (activePartner && tab === "private") {
       loadMessages(activePartner.id);
       pollRef.current = setInterval(() => {
         loadMessages(activePartner.id);
@@ -62,16 +62,7 @@ export default function ChatPage({ user }) {
       }, 2000);
     }
     return () => clearInterval(pollRef.current);
-  }, [activePartner]);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  useEffect(() => {
-    if (search.length < 1) { setSearchResults([]); return; }
-    setSearchResults(allUsers.filter(u => u.username.toLowerCase().includes(search.toLowerCase())));
-  }, [search, allUsers]);
+  }, [activePartner, tab]);
 
   async function handleSend() {
     if (!text.trim() || !activePartner) return;
@@ -80,11 +71,11 @@ export default function ChatPage({ user }) {
       headers: { ...headers, "Content-Type": "application/json" },
       body: JSON.stringify({ receiverId: activePartner.id, text: text.trim() })
     });
-    if (res.ok) { 
-      const data = await res.json(); 
-      setMessages(prev => [...prev, data]); 
-      setText(""); 
-      loadConversations(); 
+    if (res.ok) {
+      const data = await res.json();
+      setMessages(prev => [...prev, data]);
+      setText("");
+      loadConversations();
     }
   }
 
@@ -95,173 +86,105 @@ export default function ChatPage({ user }) {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("receiverId", activePartner.id);
-
     const res = await fetch(`${API}/send-image`, { method: "POST", headers, body: formData });
-    if (res.ok) { 
-      const data = await res.json(); 
-      setMessages(prev => [...prev, data]); 
-      loadConversations(); 
+    if (res.ok) {
+      const data = await res.json();
+      setMessages(prev => [...prev, data]);
+      loadConversations();
     }
   }
 
-  function openChat(partner) { 
-    setActivePartner(partner); 
-    setSearch(""); 
-    setSearchResults([]); 
+  function openChat(partner) {
+    setActivePartner(partner);
+    setSearch("");
   }
-
-  function renderMessage(msg) {
-    const isMine = msg.senderId === user.id;
-    let content;
-
-    if (msg.type === "image") {
-      const imgUrl = IMAGE_ENDPOINTS.chatImage(msg.imageFileName);
-      content = (
-        <div className="chat-bubble image-bubble" onClick={() => setViewImage(imgUrl)}>
-          <img src={imgUrl} alt="фото" onError={e => { e.target.src = FALLBACK_IMAGE; }} />
-        </div>
-      );
-    } else {
-      content = (
-        <div className="chat-bubble">
-          <p>{msg.text}</p>
-        </div>
-      );
-    }
-
-    return (
-      <div key={msg.id} className={`chat-message-row ${isMine ? "mine" : ""}`}>
-        <div className="chat-message-content">
-          {content}
-          <p className="chat-time">
-            {new Date(msg.createdAt).toLocaleTimeString("uk-UA", { hour: "2-digit", minute: "2-digit" })}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  const leftList = search.length >= 1 ? searchResults : allUsers;
 
   if (!user) return <div className="chat-empty-state">Увійдіть щоб використовувати чат</div>;
 
   return (
     <div className="chat-layout">
-      
+
+      {/* Ліва панель: вкладки + список */}
       <div className="chat-sidebar">
-        <div className="chat-search-box">
-          <input type="text" placeholder="Пошук..." value={search} onChange={e => setSearch(e.target.value)} className="chat-search-input" />
+
+        {/* Перемикач вкладок */}
+        <div style={{ display: "flex", borderBottom: "1px solid #2a2a3e" }}>
+          <button
+            onClick={() => setTab("private")}
+            style={{
+              flex: 1,
+              padding: "12px 0",
+              background: "none",
+              border: "none",
+              borderBottom: tab === "private" ? "2px solid #7c3aed" : "2px solid transparent",
+              color: tab === "private" ? "#fff" : "#666",
+              cursor: "pointer",
+              fontWeight: tab === "private" ? "bold" : "normal",
+              fontSize: "13px",
+              transition: "all 0.2s"
+            }}
+          >
+            💬 Особисті
+          </button>
+          <button
+            onClick={() => setTab("global")}
+            style={{
+              flex: 1,
+              padding: "12px 0",
+              background: "none",
+              border: "none",
+              borderBottom: tab === "global" ? "2px solid #e879f9" : "2px solid transparent",
+              color: tab === "global" ? "#fff" : "#666",
+              cursor: "pointer",
+              fontWeight: tab === "global" ? "bold" : "normal",
+              fontSize: "13px",
+              transition: "all 0.2s"
+            }}
+          >
+            🌍 Глобальний
+          </button>
         </div>
 
-        <div className="chat-user-list">
-          {leftList.map(u => {
-            const conv = conversations.find(c => c.partner.id === u.id);
-            const unread = conv?.unreadCount || 0;
-            return (
-              <div key={u.id} onClick={() => openChat(u)} className={`chat-user-item ${activePartner?.id === u.id ? "active" : ""}`}>
-                <div className="chat-avatar">
-                  {u.username[0].toUpperCase()}
-                  {unread > 0 && <span className="unread-badge">{unread}</span>}
-                </div>
-                <div className="chat-user-info">
-                  <div className="chat-username-row">
-                    <span className="chat-username">{u.username}</span>
-                    {conv && <span className="chat-date">Сьогодні</span>}
-                  </div>
-                  {conv?.lastMessage && (
-                    <p className="chat-last-message">
-                      {conv.lastMessage.senderId === user.id ? "Ви: " : ""}
-                      {conv.lastMessage.type === "image" ? "Фото" : conv.lastMessage.text}
-                    </p>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+        {/* Список юзерів — тільки у вкладці "Особисті" */}
+        {tab === "private" && (
+          <UserList
+            user={user}
+            conversations={conversations}
+            allUsers={allUsers}
+            search={search}
+            setSearch={setSearch}
+            activePartner={activePartner}
+            onOpenChat={openChat}
+          />
+        )}
 
-      <div className="chat-main">
-        {!activePartner ? (
-          <div className="chat-empty-state">
-            <p>Оберіть користувача, щоб почати листування</p>
+        {/* У вкладці "Глобальний" список не потрібен */}
+        {tab === "global" && (
+          <div style={{ padding: "20px 16px", color: "#555", fontSize: "13px", textAlign: "center" }}>
+            Загальний чат для всіх гравців
           </div>
-        ) : (
-          <>
-            <div className="chat-messages-container">
-              {messages.length === 0 && (
-                <p className="chat-list-empty" style={{ marginTop: 40 }}>Немає повідомлень</p>
-              )}
-              {messages.map(msg => renderMessage(msg))}
-              <div ref={messagesEndRef} />
-            </div>
-
-            <div className="chat-input-wrapper">
-              <div className="chat-input-bar">
-                <button className="chat-icon-btn text-format">T</button>
-                <button className="chat-icon-btn attach" onClick={() => fileInputRef.current.click()}>📎</button>
-                <input ref={fileInputRef} type="file" style={{ display: "none" }} onChange={handleFileSelect} />
-
-                <input 
-                  className="chat-text-input" 
-                  value={text} 
-                  onChange={e => setText(e.target.value)}
-                  onKeyDown={e => { if (e.key === "Enter") handleSend(); }}
-                  placeholder="Ваше повідомлення..."
-                />
-                
-                <button className="chat-icon-btn mic">🎤</button>
-              </div>
-            </div>
-          </>
         )}
       </div>
 
-      {activePartner && (
-        <div className="chat-right-panel">
-          <div className="profile-summary">
-            <div className="profile-avatar-large">
-              {activePartner.username[0].toUpperCase()}
-            </div>
-            <h3 className="profile-name">{activePartner.username}</h3>
-            <span className="profile-status">онлайн</span>
-          </div>
+      {/* Права частина */}
+      <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
+        {tab === "private" ? (
+          <PrivateChat
+            user={user}
+            activePartner={activePartner}
+            messages={messages}
+            text={text}
+            setText={setText}
+            onSend={handleSend}
+            onFileSelect={handleFileSelect}
+            viewImage={viewImage}
+            setViewImage={setViewImage}
+          />
+        ) : (
+          <GlobalChat user={user} />
+        )}
+      </div>
 
-          <div className="right-panel-section toggle-section">
-            <span>🔔 Сповіщення</span>
-            <div className="toggle-switch active"></div>
-          </div>
-
-          <div className="right-panel-section media-stats">
-            <div className="media-stat-item">
-              <span>🖼️ Фото</span>
-              <span className="stat-count">0</span>
-            </div>
-            <div className="media-stat-item">
-              <span>📄 Файли</span>
-              <span className="stat-count">0</span>
-            </div>
-            <div className="media-stat-item">
-              <span>🎤 Голосові повідомлення</span>
-              <span className="stat-count">0</span>
-            </div>
-          </div>
-
-          <div className="right-panel-section actions">
-            <button className="action-row">👤 Видалити з друзів</button>
-            <button className="action-row">🗑️ Очистити історію</button>
-            <button className="action-row">🚫 Заблокувати</button>
-            <button className="action-row danger">⚠️ Поскаржитись</button>
-          </div>
-        </div>
-      )}
-
-      {/* Перегляд фото */}
-      {viewImage && (
-        <div className="modal-overlay" onClick={() => setViewImage(null)}>
-          <img src={viewImage} alt="fullscreen" style={{ maxWidth: "90vw", maxHeight: "90vh", borderRadius: "8px", objectFit: "contain" }} onClick={e => e.stopPropagation()} />
-        </div>
-      )}
     </div>
   );
 }
