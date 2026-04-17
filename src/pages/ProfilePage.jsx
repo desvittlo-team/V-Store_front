@@ -1,283 +1,193 @@
-import { useEffect, useState, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useEffect, useState, useRef } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+
+// Іконки (SVG)
+const EditIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>;
+const BadgeIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#24E5C2" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>;
 
 export default function ProfilePage({ user, setUser }) {
-  const { id } = useParams();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState(null);
+  const { id } = useParams();
+  const fileInputRef = useRef(null);
+  
+  const [profileData, setProfileData] = useState(null);
+  const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [newUsername, setNewUsername] = useState("");
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
-  const avatarRef = useRef();
 
-  const isMe = user?.id === parseInt(id);
-  const headers = { Authorization: `Bearer ${user?.token}` };
+  const isOwnProfile = !id || (user && String(id) === String(user.id));
 
-  const [inventory, setInventory] = useState([]);
-
-    useEffect(() => {
-    // добавь в существующий useEffect если isMe
-    if (isMe) {
-        fetch("https://localhost:7059/api/market/inventory", { headers })
-        .then(r => r.json())
-        .then(setInventory)
-        .catch(() => {});
-    }
-    }, [id]);
   useEffect(() => {
-    const url = isMe
-      ? "https://localhost:7059/api/profile/me"
-      : `https://localhost:7059/api/profile/${id}`;
+    if (!user?.token) {
+      navigate("/login");
+      return;
+    }
 
-    fetch(url, isMe ? { headers } : {})
-      .then(r => r.json())
-      .then(data => { setProfile(data); setNewUsername(data.user.username); setLoading(false); })
-      .catch(() => setLoading(false));
-  }, [id]);
+    const headers = { Authorization: `Bearer ${user.token}` };
+    const fetchUrl = id ? `https://localhost:7059/api/profile/${id}` : "https://localhost:7059/api/profile/me";
 
-  async function handleSaveUsername() {
-    if (!newUsername.trim()) return;
-    const res = await fetch("https://localhost:7059/api/profile/me", {
-      method: "PUT",
-      headers: { ...headers, "Content-Type": "application/json" },
-      body: JSON.stringify({ username: newUsername.trim() })
-    });
-    const data = await res.json();
-    if (!res.ok) { setError(data.message); return; }
-    setProfile(prev => ({ ...prev, user: data }));
-    const updatedUser = { ...user, username: data.username };
-    localStorage.setItem("user", JSON.stringify(updatedUser));
-    setUser(updatedUser);
-    setEditing(false);
-    setMessage("✅ Ім'я змінено");
-    setTimeout(() => setMessage(""), 2000);
-  }
+    Promise.all([
+      fetch(fetchUrl, { headers }),
+      fetch("https://localhost:7059/api/users", { headers })
+    ])
+      .then(async ([pRes, uRes]) => {
+        if (pRes.status === 401) { navigate("/login"); return; }
+        const p = pRes.ok ? await pRes.json() : null;
+        const u = uRes.ok ? await uRes.json() : [];
+        setProfileData(p);
+        setFriends(u);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [user, navigate, id]);
 
-  async function handleAvatarChange(e) {
+  const handleAvatarUpload = async (e) => {
     const file = e.target.files[0];
-    if (!file) return;
+    if (!file || !user?.token) return;
     const formData = new FormData();
     formData.append("file", file);
     const res = await fetch("https://localhost:7059/api/profile/me/avatar", {
       method: "POST",
-      headers,
+      headers: { Authorization: `Bearer ${user.token}` },
       body: formData
     });
-    const data = await res.json();
     if (res.ok) {
-      setProfile(prev => ({ ...prev, user: { ...prev.user, photo: data.fileName } }));
-      setMessage("✅ Аватар оновлено");
-      setTimeout(() => setMessage(""), 2000);
+      const data = await res.json();
+      setProfileData(prev => ({ ...prev, user: { ...prev.user, photo: data.fileName } }));
+      if (setUser) setUser(prev => ({ ...prev, photo: data.fileName }));
     }
-  }
+  };
 
-  if (loading) return <div className="loading-screen">Завантаження...</div>;
-  if (!profile) return <div style={{ textAlign: "center", marginTop: "100px", color: "#aaa" }}>Користувача не знайдено</div>;
+  const handleSaveProfile = async () => {
+    if (!newUsername.trim() || !user?.token) return;
+    const res = await fetch("https://localhost:7059/api/profile/me", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.token}` },
+      body: JSON.stringify({ username: newUsername })
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      setProfileData(prev => ({ ...prev, user: updated }));
+      if (setUser) setUser(prev => ({ ...prev, username: updated.username }));
+      setIsEditing(false);
+    }
+  };
 
-  const { user: u, library, screenshots } = profile;
+  if (loading) return null;
+  if (!profileData?.user) return <div className="main-container" style={{color:"#fff", padding:"50px"}}>Профіль не знайдено</div>;
+
+  const { user: pUser, library = [], screenshots = [] } = profileData;
 
   return (
-    <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "32px 16px" }}>
-
-      {message && (
-        <div style={{
-          position: "fixed", top: "80px", left: "50%", transform: "translateX(-50%)",
-          background: "#1a1a2e", border: "1px solid #7c3aed", color: "#fff",
-          padding: "12px 24px", borderRadius: "8px", zIndex: 9999, fontSize: "14px"
-        }}>
-          {message}
-        </div>
-      )}
-
-      {/* Шапка профиля */}
-      <div style={{
-        background: "#1a1a2e", borderRadius: "14px", padding: "32px",
-        border: "1px solid #2a2a3e", marginBottom: "24px",
-        display: "flex", alignItems: "center", gap: "24px", flexWrap: "wrap"
-      }}>
-        {/* Аватар */}
-        <div style={{ position: "relative" }}>
-          <div style={{
-            width: "100px", height: "100px", borderRadius: "50%",
-            background: "#2a2a3e", overflow: "hidden",
-            border: "3px solid #7c3aed"
-          }}>
-            {u.photo && u.photo !== "User.png" ? (
-              <img
-                src={`https://localhost:7059/avatars/${u.photo}`}
-                alt={u.username}
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                onError={e => e.target.style.display = "none"}
-              />
-            ) : (
-              <div style={{
-                width: "100%", height: "100%", display: "flex",
-                alignItems: "center", justifyContent: "center",
-                fontSize: "36px", fontWeight: "bold", color: "#fff"
-              }}>
-                {u.username[0].toUpperCase()}
-              </div>
-            )}
+    <div className="profile-layout main-container">
+      <div className="profile-header-banner">
+        <div className="banner-bg"></div>
+        <div className="profile-user-info-bar">
+          <div className={`profile-avatar-wrapper ${isOwnProfile ? 'editable' : ''}`} onClick={() => isOwnProfile && fileInputRef.current.click()}>
+            <img 
+              src={pUser.photo && pUser.photo !== "User.png" ? `https://localhost:7059/avatars/${pUser.photo}` : '/no-image.png'} 
+              alt="avatar" 
+              className="profile-avatar-large" 
+              onError={(e) => e.target.src = '/no-image.png'}
+            />
+            {isOwnProfile && <div className="avatar-upload-overlay">📷</div>}
+            <input type="file" ref={fileInputRef} style={{display:"none"}} onChange={handleAvatarUpload} />
           </div>
-          {isMe && (
-            <>
-              <button
-                onClick={() => avatarRef.current.click()}
-                style={{
-                  position: "absolute", bottom: 0, right: 0,
-                  background: "#7c3aed", border: "none", borderRadius: "50%",
-                  width: "28px", height: "28px", cursor: "pointer",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: "14px"
-                }}
-              >
-                📷
+          <div className="profile-name-block">
+            <h1>{pUser.username}</h1>
+            <span className="status-online">Онлайн</span>
+            <p className="status-quote">У пошуках нових пригод. Кожен новий рівень — це можливість пережити незабутні моменти...</p>
+          </div>
+          <div className="profile-actions-block">
+            {isOwnProfile ? (
+              <button className="btn-edit-profile" onClick={() => { setNewUsername(pUser.username); setIsEditing(true); }}>
+                <EditIcon /> Редагувати профіль
               </button>
-              <input ref={avatarRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleAvatarChange} />
-            </>
-          )}
-        </div>
-
-        {/* Инфо */}
-        <div style={{ flex: 1 }}>
-          {editing ? (
-            <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "8px" }}>
-              <input
-                value={newUsername}
-                onChange={e => setNewUsername(e.target.value)}
-                style={{
-                  padding: "8px 12px", borderRadius: "8px", background: "#2a2a3e",
-                  border: "1px solid #7c3aed", color: "#fff", fontSize: "18px", outline: "none"
-                }}
-              />
-              <button onClick={handleSaveUsername} style={{ padding: "8px 16px", background: "#7c3aed", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer" }}>
-                Зберегти
-              </button>
-              <button onClick={() => { setEditing(false); setError(""); }} style={{ padding: "8px 16px", background: "transparent", color: "#aaa", border: "1px solid #333", borderRadius: "8px", cursor: "pointer" }}>
-                Скасувати
-              </button>
-            </div>
-          ) : (
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px" }}>
-              <h1 style={{ color: "#fff", margin: 0, fontSize: "24px" }}>{u.username}</h1>
-              {u.role === "Admin" && (
-                <span style={{ background: "#7c3aed", color: "#fff", fontSize: "11px", padding: "3px 10px", borderRadius: "4px" }}>Admin</span>
-              )}
-              {isMe && (
-                <button onClick={() => setEditing(true)} style={{ background: "transparent", border: "1px solid #333", color: "#aaa", padding: "4px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "12px" }}>
-                  ✏️ Редагувати
-                </button>
-              )}
-            </div>
-          )}
-          {error && <p style={{ color: "#ef4444", fontSize: "13px", margin: "4px 0" }}>{error}</p>}
-          <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
-            <span style={{ color: "#666", fontSize: "14px" }}>🎮 Ігор: {library.length}</span>
-            <span style={{ color: "#666", fontSize: "14px" }}>📷 Скриншотів: {screenshots.length}</span>
-            {isMe && profile.user.balance !== undefined && (
-              <span style={{ color: "#7c3aed", fontSize: "14px" }}>💰 {parseFloat(profile.user.balance).toFixed(2)}$</span>
-            )}
+            ) : <button className="btn-primary">Додати в друзі</button>}
           </div>
         </div>
-
-        {/* Кнопка написать */}
-        {!isMe && user && (
-          <button
-            onClick={() => navigate("/chat", { state: { partnerId: u.id, partnerUsername: u.username } })}
-            style={{ padding: "10px 20px", background: "#7c3aed", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer" }}
-          >
-            💬 Написати
-          </button>
-        )}
       </div>
 
-      {/* Библиотека */}
-      {library.length > 0 && (
-        <div style={{ marginBottom: "24px" }}>
-          <h2 style={{ color: "#fff", fontSize: "18px", marginBottom: "16px" }}>🎮 Бібліотека ігор</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "12px" }}>
-            {library.map(g => (
-              <div key={g.id} style={{ background: "#1a1a2e", borderRadius: "8px", overflow: "hidden", border: "1px solid #2a2a3e" }}>
-                <img
-                  src={`https://localhost:7059/pics/${g.photo}`}
-                  alt={g.name}
-                  style={{ width: "100%", height: "80px", objectFit: "cover" }}
-                  onError={e => e.target.style.display = "none"}
-                />
-                <div style={{ padding: "8px" }}>
-                  <p style={{ color: "#fff", fontSize: "12px", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.name}</p>
-                  <p style={{ color: "#facc15", fontSize: "11px", margin: "2px 0 0" }}>⭐ {g.gpa}</p>
-                </div>
+      <div className="profile-body-grid">
+        <div className="profile-main-col">
+          <div className="profile-card">
+            <h3 className="card-title">Галерея значків</h3>
+            <div className="badges-container">
+              <div className="badge-count">
+                <span className="count">5</span>
+                <span className="label">Значків</span>
               </div>
-            ))}
+              <div className="badges-list">
+                <BadgeIcon /> <BadgeIcon /> <BadgeIcon /> <BadgeIcon />
+              </div>
+            </div>
           </div>
-        </div>
-      )}
 
-      {/* Скриншоты */}
-      {screenshots.length > 0 && (
-        <div>
-          <h2 style={{ color: "#fff", fontSize: "18px", marginBottom: "16px" }}>📷 Скриншоти</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "12px" }}>
-            {screenshots.map(s => (
-              <div key={s.id} style={{ background: "#1a1a2e", borderRadius: "8px", overflow: "hidden", border: "1px solid #2a2a3e" }}>
-                <img
-                  src={`https://localhost:7059/screenshots/${s.fileName}`}
-                  alt={s.caption || "screenshot"}
-                  style={{ width: "100%", height: "120px", objectFit: "cover" }}
-                  onError={e => e.target.style.display = "none"}
-                />
-                {s.caption && <p style={{ color: "#aaa", fontSize: "12px", padding: "6px 10px", margin: 0 }}>{s.caption}</p>}
-              </div>
-            ))}
+          <div className="profile-card">
+            <h3 className="card-title">Колекція ігор</h3>
+            <div className="collection-stats">
+              <div className="stat-box"><span className="count">{library.length}</span><span className="label">Ігор</span></div>
+              <div className="stat-box"><span className="count">121</span><span className="label">DLC</span></div>
+              <div className="stat-box"><span className="count">2564</span><span className="label">Рецензії</span></div>
+            </div>
+            <div className="collection-covers">
+              {library.slice(0, 4).map(g => (
+                <img key={g.id} src={`https://localhost:7059/images/${g.photo}`} alt={g.name} className="collection-game-cover" onError={(e) => e.target.src = '/no-image.png'} />
+              ))}
+            </div>
+          </div>
+          
+          {/* Блок обговорень, як на макеті */}
+          <div className="profile-card">
+            <h3 className="card-title">Галерея обговорень</h3>
+            <div className="mock-post">
+              <div className="post-header">👤 Fallout 4 <span>25.02.2024</span></div>
+              <p>Я грав у Nuka World DLC, коли потрапив у дитяче королівство... Це неймовірно!</p>
+              <div className="post-img-placeholder"></div>
+            </div>
+          </div>
+        </div>
+
+        <div className="profile-sidebar-col">
+          <div className="profile-level-card">
+            <div className="level-header"><h3>Рівень</h3><span className="level-badge">99</span></div>
+            <ul className="level-menu">
+              <li className="active">Головна <span className="count">100</span></li>
+              <li>Значки <span className="count">100</span></li>
+              <li>Ігри <span className="count">{library.length}</span></li>
+              <li>Бажане <span className="count">100</span></li>
+              <li>Обговорення <span className="count">100</span></li>
+            </ul>
+          </div>
+
+          <div className="profile-friends-card">
+            <div className="friends-header"><h3>Друзі</h3><span className="count">{friends.length}</span></div>
+            <ul className="friends-list-compact">
+              {friends.slice(0, 5).map(f => (
+                <li key={f.id} onClick={() => navigate(`/profile/${f.id}`)}>
+                  <div className="avatar-mini">{f.username ? f.username[0].toUpperCase() : "?"}</div>
+                  <span className="friend-name">{f.username}</span>
+                  <span className="friend-lvl">40</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {isEditing && (
+        <div className="modal-overlay" onClick={() => setIsEditing(false)}>
+          <div className="edit-modal" onClick={e => e.stopPropagation()}>
+            <h3>Редагувати профіль</h3>
+            <input className="edit-input" value={newUsername} onChange={e => setNewUsername(e.target.value)} placeholder="Ваш нікнейм" />
+            <div className="modal-actions">
+              <button className="btn-cancel" onClick={() => setIsEditing(false)}>Скасувати</button>
+              <button className="btn-save" onClick={handleSaveProfile}>Зберегти</button>
+            </div>
           </div>
         </div>
       )}
-      {/* Інвентар */}
-<div style={{ marginBottom: "24px" }}>
-  <h2 style={{ color: "#fff", fontSize: "18px", marginBottom: "16px" }}>
-    🎒 Інвентар ({inventory.length})
-  </h2>
-  {inventory.length === 0 ? (
-    <div style={{
-      background: "#1a1a2e", borderRadius: "10px", padding: "32px",
-      border: "1px solid #2a2a3e", textAlign: "center"
-    }}>
-      <p style={{ color: "#555", margin: 0 }}>Інвентар порожній — купіть предмети на маркеті</p>
-    </div>
-  ) : (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "12px" }}>
-      {inventory.map(ii => (
-        <div key={ii.id} style={{
-          background: "#1a1a2e", borderRadius: "8px", overflow: "hidden",
-          border: "1px solid #2a2a3e"
-        }}>
-          <div style={{ height: "100px", background: "#2a2a3e", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            {ii.item.photo && ii.item.photo !== "default_item.png" ? (
-              <img
-                src={`https://localhost:7059/items/${ii.item.photo}`}
-                alt={ii.item.name}
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                onError={e => e.target.style.display = "none"}
-              />
-            ) : (
-              <span style={{ fontSize: "36px" }}>🎮</span>
-            )}
-          </div>
-          <div style={{ padding: "8px" }}>
-            <p style={{ color: "#fff", fontSize: "12px", margin: "0 0 2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {ii.item.name}
-            </p>
-            <p style={{ color: "#666", fontSize: "11px", margin: 0 }}>{ii.item.game.name}</p>
-          </div>
-        </div>
-      ))}
-    </div>
-  )}
-</div>
-      
     </div>
   );
 }
