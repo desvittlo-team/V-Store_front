@@ -1,8 +1,6 @@
-// UserList.jsx — бічна панель: пошук + список юзерів/розмов
-
 export default function UserList({ user, conversations, allUsers, search, setSearch, activePartner, onOpenChat }) {
-  const leftList = search.length >= 1
-  ? allUsers
+const leftList = search.length >= 1
+  ? allUsers.filter(u => u.username.toLowerCase().includes(search.toLowerCase()))
   : conversations.map(c => c.partner);
   return (
     <div className="chat-sidebar">

@@ -1,15 +1,62 @@
-// PrivateChat.jsx — область переписки + права панель профілю
-
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IMAGE_ENDPOINTS, FALLBACK_IMAGE } from "../../api/imageHelper";
 
-export default function PrivateChat({ user, activePartner, messages, text, setText, onSend, onFileSelect, viewImage, setViewImage }) {
+export default function PrivateChat({
+  user, activePartner, messages, text, setText,
+  onSend, onFileSelect, viewImage, setViewImage,
+  onDeleteMessage, onEditMessage
+}) {
   const messagesEndRef = useRef();
   const fileInputRef = useRef();
+  const menuRef = useRef();
+
+  const [menuState, setMenuState] = useState(null);
+  const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    function handleOutside(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuState(null);
+      }
+    }
+    if (menuState) document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, [menuState]);
+
+  function handleContextMenu(e, msg) {
+    e.preventDefault();
+    setMenuState({ x: e.clientX, y: e.clientY, msg });
+  }
+
+  function handleCopy(msg) {
+    navigator.clipboard.writeText(msg.text || "");
+    setMenuState(null);
+  }
+
+  function handleEdit(msg) {
+    setText(msg.text || "");
+    setEditingId(msg.id);
+    setMenuState(null);
+  }
+
+  function handleDelete(msg) {
+    onDeleteMessage?.(msg.id);
+    setMenuState(null);
+  }
+
+  function handleSend() {
+    if (editingId) {
+      onEditMessage?.(editingId, text);
+      setEditingId(null);
+      setText("");
+    } else {
+      onSend();
+    }
+  }
 
   function renderMessage(msg) {
     const isMine = msg.senderId === user.id;
@@ -18,7 +65,11 @@ export default function PrivateChat({ user, activePartner, messages, text, setTe
     if (msg.type === "image") {
       const imgUrl = IMAGE_ENDPOINTS.chatImage(msg.imageFileName);
       content = (
-        <div className="chat-bubble image-bubble" onClick={() => setViewImage(imgUrl)}>
+        <div
+          className="chat-bubble image-bubble"
+          onClick={() => setViewImage(imgUrl)}
+          onContextMenu={e => handleContextMenu(e, msg)}
+        >
           <img
             src={imgUrl}
             alt="фото"
@@ -28,8 +79,14 @@ export default function PrivateChat({ user, activePartner, messages, text, setTe
       );
     } else {
       content = (
-        <div className="chat-bubble">
+        <div
+          className="chat-bubble"
+          onContextMenu={e => handleContextMenu(e, msg)}
+        >
           <p>{msg.text}</p>
+          {msg.updatedAt && (
+            <span className="chat-edited">(змінено)</span>
+          )}
         </div>
       );
     }
@@ -39,7 +96,9 @@ export default function PrivateChat({ user, activePartner, messages, text, setTe
         <div className="chat-message-content">
           {content}
           <p className="chat-time">
-            {new Date(msg.createdAt).toLocaleTimeString("uk-UA", { hour: "2-digit", minute: "2-digit" })}
+            {new Date(msg.createdAt).toLocaleTimeString("uk-UA", {
+              hour: "2-digit", minute: "2-digit"
+            })}
           </p>
         </div>
       </div>
@@ -58,7 +117,6 @@ export default function PrivateChat({ user, activePartner, messages, text, setTe
 
   return (
     <>
-      {/* Головна область чату */}
       <div className="chat-main">
         <div className="chat-messages-container">
           {messages.length === 0 && (
@@ -69,6 +127,12 @@ export default function PrivateChat({ user, activePartner, messages, text, setTe
         </div>
 
         <div className="chat-input-wrapper">
+          {editingId && (
+            <div className="chat-edit-hint">
+              ✏️ Редагування повідомлення
+              <button onClick={() => { setEditingId(null); setText(""); }}>✕</button>
+            </div>
+          )}
           <div className="chat-input-bar">
             <button className="chat-icon-btn text-format">T</button>
             <button className="chat-icon-btn attach" onClick={() => fileInputRef.current.click()}>📎</button>
@@ -82,7 +146,7 @@ export default function PrivateChat({ user, activePartner, messages, text, setTe
               className="chat-text-input"
               value={text}
               onChange={e => setText(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter") onSend(); }}
+              onKeyDown={e => { if (e.key === "Enter") handleSend(); }}
               placeholder="Ваше повідомлення..."
             />
             <button className="chat-icon-btn mic">🎤</button>
@@ -90,7 +154,6 @@ export default function PrivateChat({ user, activePartner, messages, text, setTe
         </div>
       </div>
 
-      {/* Права панель профілю */}
       <div className="chat-right-panel">
         <div className="profile-summary">
           <div className="profile-avatar-large">
@@ -128,7 +191,28 @@ export default function PrivateChat({ user, activePartner, messages, text, setTe
         </div>
       </div>
 
-      {/* Перегляд фото */}
+      {menuState && (
+        <ul
+          ref={menuRef}
+          className="chat-context-menu"
+          style={{ top: menuState.y, left: menuState.x }}
+        >
+          <li onClick={() => handleCopy(menuState.msg)}>
+            <span className="ctx-icon">⎘</span> Копіювати
+          </li>
+          {menuState.msg.senderId === user.id && (
+            <li onClick={() => handleEdit(menuState.msg)}>
+              <span className="ctx-icon">✎</span> Змінити
+            </li>
+          )}
+          {menuState.msg.senderId === user.id && (
+            <li className="danger" onClick={() => handleDelete(menuState.msg)}>
+              <span className="ctx-icon">✕</span> Видалити
+            </li>
+          )}
+        </ul>
+      )}
+
       {viewImage && (
         <div className="modal-overlay" onClick={() => setViewImage(null)}>
           <img

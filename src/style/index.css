@@ -3019,3 +3019,136 @@ body {
   border-radius: 8px;
   margin-top: 10px;
 }
+
+
+/* Контекстне меню */
+.chat-context-menu {
+  position: fixed;
+  z-index: 1000;
+  background: #042026;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 10px;
+  padding: 6px 0;
+  min-width: 180px;
+  list-style: none;
+  margin: 0;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+
+.chat-context-menu li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  color: inherit;
+  transition: background 0.12s;
+}
+
+.chat-context-menu li:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+.chat-context-menu li.danger {
+  color: #e53935;
+}
+
+.ctx-icon {
+  font-size: 15px;
+  opacity: 0.6;
+}
+
+/* Підказка редагування */
+.chat-edit-hint {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 16px;
+  font-size: 13px;
+  color: #ffffff;
+  background: rgba(0,0,0,0.03);
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+.chat-edit-hint button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  color: #aaa;
+  padding: 0 4px;
+}
+
+
+
+.navbar-link-dropdown-wrapper {
+  position: relative;
+}
+
+.navbar-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a1a2e;
+  border: 1px solid #2a2a3e;
+  border-radius: 8px;
+  padding: 6px 0;
+  min-width: 180px;
+  z-index: 1000;
+  margin-top: 8px;
+}
+
+.navbar-dropdown-menu::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid #2a2a3e;
+}
+
+.navbar-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  font-size: 13px;
+  color: #ccc;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.navbar-dropdown-item:hover {
+  background: #2a2a3e;
+  color: #fff;
+}
+
+
+.dropdown-balance {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  font-size: 14px;
+  color: #fff;
+  cursor: pointer;
+  background: #002F3D;
+  margin: 4px 8px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+
+.dropdown-balance:hover {
+  background: #00546e
+}
+
+.dropdown-balance-hint {
+  font-size: 11px;
+  color: #0087b0;
+  font-weight: 400;
+}

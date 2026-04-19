@@ -42,7 +42,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <Navbar user={user} setUser={setUser} balance={balance} />
+      <Navbar user={user} setUser={setUser} balance={balance} setBalance={setBalance} />
       <div className="page-content">
         <Routes>
           <Route path="/" element={<GamesPage user={user} balance={balance} onPurchase={fetchBalance}/>}/>

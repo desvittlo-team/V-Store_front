@@ -1,6 +1,3 @@
-// ChatPage.jsx — головний файл: збирає UserList, PrivateChat, GlobalChat
-// Перемикання між "Особисті" та "Глобальний" вкладками
-
 import { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import UserList from "../components/chat/UserList";
@@ -10,8 +7,7 @@ import GlobalChat from "../components/chat/GlobalChat";
 const API = "https://localhost:7059/api/chat";
 
 export default function ChatPage({ user }) {
-  const [tab, setTab] = useState("private"); // "private" | "global"
-
+  const [tab, setTab] = useState("private");
   const [conversations, setConversations] = useState([]);
   const [activePartner, setActivePartner] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -21,7 +17,6 @@ export default function ChatPage({ user }) {
   const [viewImage, setViewImage] = useState(null);
 
   const pollRef = useRef();
-  const fileInputRef = useRef();
   const location = useLocation();
 
   const headers = { Authorization: `Bearer ${user?.token}` };
@@ -38,16 +33,26 @@ export default function ChatPage({ user }) {
   }
 
   async function searchUsers(query) {
-  if (!query || query.length < 2) { setAllUsers([]); return; }
-  const res = await fetch(`${API}/search?q=${encodeURIComponent(query)}`, { headers });
-  if (res.ok) setAllUsers(await res.json());
-}
-    useEffect(() => {
+    if (!query || query.length < 2) { setAllUsers([]); return; }
+    const res = await fetch(`${API}/search?q=${encodeURIComponent(query)}`, { headers });
+    if (res.ok) setAllUsers(await res.json());
+  }
+
+  useEffect(() => {
     loadConversations();
   }, [user]);
+
+  useEffect(() => {
+    searchUsers(search);
+  }, [search]);
+
   useEffect(() => {
     if (location.state?.partnerId) {
-      setActivePartner({ id: location.state.partnerId, username: location.state.partnerUsername, photo: "" });
+      setActivePartner({
+        id: location.state.partnerId,
+        username: location.state.partnerUsername,
+        photo: ""
+      });
       setTab("private");
     }
   }, [location.state]);
@@ -79,6 +84,29 @@ export default function ChatPage({ user }) {
     }
   }
 
+  async function handleDeleteMessage(messageId) {
+    const res = await fetch(`${API}/messages/${messageId}`, {
+      method: "DELETE",
+      headers
+    });
+    if (res.ok) {
+      setMessages(prev => prev.filter(m => m.id !== messageId));
+      loadConversations();
+    }
+  }
+
+  async function handleEditMessage(messageId, newText) {
+    const res = await fetch(`${API}/messages/${messageId}`, {
+      method: "PUT",
+      headers: { ...headers, "Content-Type": "application/json" },
+      body: JSON.stringify({ text: newText })
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      setMessages(prev => prev.map(m => m.id === messageId ? updated : m));
+    }
+  }
+
   async function handleFileSelect(e) {
     const file = e.target.files[0];
     if (!file || !activePartner) return;
@@ -97,31 +125,23 @@ export default function ChatPage({ user }) {
   function openChat(partner) {
     setActivePartner(partner);
     setSearch("");
+    setAllUsers([]);
   }
 
   if (!user) return <div className="chat-empty-state">Увійдіть щоб використовувати чат</div>;
 
   return (
     <div className="chat-layout">
-
-      {/* Ліва панель: вкладки + список */}
       <div className="chat-sidebar">
-
-        {/* Перемикач вкладок */}
         <div style={{ display: "flex", borderBottom: "1px solid #2a2a3e" }}>
           <button
             onClick={() => setTab("private")}
             style={{
-              flex: 1,
-              padding: "12px 0",
-              background: "none",
-              border: "none",
+              flex: 1, padding: "12px 0", background: "none", border: "none",
               borderBottom: tab === "private" ? "2px solid #7c3aed" : "2px solid transparent",
-              color: tab === "private" ? "#fff" : "#666",
-              cursor: "pointer",
+              color: tab === "private" ? "#fff" : "#666", cursor: "pointer",
               fontWeight: tab === "private" ? "bold" : "normal",
-              fontSize: "13px",
-              transition: "all 0.2s"
+              fontSize: "13px", transition: "all 0.2s"
             }}
           >
             💬 Особисті
@@ -129,23 +149,17 @@ export default function ChatPage({ user }) {
           <button
             onClick={() => setTab("global")}
             style={{
-              flex: 1,
-              padding: "12px 0",
-              background: "none",
-              border: "none",
+              flex: 1, padding: "12px 0", background: "none", border: "none",
               borderBottom: tab === "global" ? "2px solid #e879f9" : "2px solid transparent",
-              color: tab === "global" ? "#fff" : "#666",
-              cursor: "pointer",
+              color: tab === "global" ? "#fff" : "#666", cursor: "pointer",
               fontWeight: tab === "global" ? "bold" : "normal",
-              fontSize: "13px",
-              transition: "all 0.2s"
+              fontSize: "13px", transition: "all 0.2s"
             }}
           >
             🌍 Глобальний
           </button>
         </div>
 
-        {/* Список юзерів — тільки у вкладці "Особисті" */}
         {tab === "private" && (
           <UserList
             user={user}
@@ -158,7 +172,6 @@ export default function ChatPage({ user }) {
           />
         )}
 
-        {/* У вкладці "Глобальний" список не потрібен */}
         {tab === "global" && (
           <div style={{ padding: "20px 16px", color: "#555", fontSize: "13px", textAlign: "center" }}>
             Загальний чат для всіх гравців
@@ -166,7 +179,6 @@ export default function ChatPage({ user }) {
         )}
       </div>
 
-      {/* Права частина */}
       <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
         {tab === "private" ? (
           <PrivateChat
@@ -179,12 +191,13 @@ export default function ChatPage({ user }) {
             onFileSelect={handleFileSelect}
             viewImage={viewImage}
             setViewImage={setViewImage}
+            onDeleteMessage={handleDeleteMessage}
+            onEditMessage={handleEditMessage}
           />
         ) : (
           <GlobalChat user={user} />
         )}
       </div>
-
     </div>
   );
 }
