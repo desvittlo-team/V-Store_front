@@ -13,6 +13,7 @@ import ProfilePage from "./pages/ProfilePage";
 import MarketPage from "./pages/MarketPage";
 import GameDetailsPage from "./pages/GameDetailsPage"; 
 import CartPage from "./pages/CartPage";
+import WishlistPage from "./pages/WishlistPage";
 
 export default function App() {
   const [user, setUser] = useState(() => {
@@ -57,6 +58,7 @@ export default function App() {
           <Route path="/profile/:id" element={<ProfilePage user={user} setUser={setUser} />} />
           <Route path="/profile" element={<ProfilePage user={user} setUser={setUser} />} />
           <Route path="/market" element={<MarketPage user={user} onPurchase={fetchBalance} />} />
+          <Route path="/wishlist" element={<WishlistPage user={user} onPurchase={fetchBalance} />} />
         </Routes>
       </div>
       <Footer />

@@ -102,6 +102,9 @@ export default function Navbar({ user, setUser, balance, setBalance }) {
                     </Link>
                   </>
                 )}
+                <Link to="/wishlist" className={`nav-item ${location.pathname === '/wishlist' ? 'active' : ''}`}>
+                  💝 Бажання
+                </Link>
               </div>
             )}
           </div>
