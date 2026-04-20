@@ -94,6 +94,9 @@ export default function Navbar({ user, setUser, balance, setBalance }) {
                 <Link to="/chat" className="navbar-dropdown-item" onClick={() => setIsCommunityOpen(false)}>
                   💬 Чат
                 </Link>
+                <Link to="/wishlist" className="navbar-dropdown-item" onClick={() => setIsCommunityOpen(false)}>
+                  💝 Бажання
+                </Link>
                 {user?.role === "Admin" && (
                   <>
                     <div className="navbar-dropdown-divider" />
@@ -102,9 +105,7 @@ export default function Navbar({ user, setUser, balance, setBalance }) {
                     </Link>
                   </>
                 )}
-                <Link to="/wishlist" className={`nav-item ${location.pathname === '/wishlist' ? 'active' : ''}`}>
-                  💝 Бажання
-                </Link>
+
               </div>
             )}
           </div>

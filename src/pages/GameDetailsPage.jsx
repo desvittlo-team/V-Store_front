@@ -8,6 +8,7 @@ export default function GameDetailsPage({ user }) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("about");
   const [message, setMessage] = useState("");
+  const [isInWishlist, setIsInWishlist] = useState(false);
 
   useEffect(() => {
     fetch(`https://localhost:7059/api/games/${id}`)
@@ -19,6 +20,20 @@ export default function GameDetailsPage({ user }) {
       .catch(() => navigate("/"))
       .finally(() => setLoading(false));
   }, [id, navigate]);
+
+  // Завантажуємо статус wishlist при завантаженні компонента
+  useEffect(() => {
+    if (!user?.token) return;
+    
+    fetch("https://localhost:7059/api/wishlist/ids", {
+      headers: { Authorization: `Bearer ${user.token}` }
+    })
+      .then(res => res.json())
+      .then(ids => {
+        setIsInWishlist(ids.includes(parseInt(id)));
+      })
+      .catch(err => console.log("Помилка завантаження wishlist", err));
+  }, [id, user?.token]);
 
   const showToast = (msg) => {
     setMessage(msg);
@@ -53,6 +68,32 @@ export default function GameDetailsPage({ user }) {
       });
       if (res.ok) showToast("Гру додано у кошик!");
       else showToast("Помилка при додаванні");
+    } catch {
+      showToast("Помилка сервера");
+    }
+  };
+
+  // Функція для додавання/видалення з wishlist
+  const toggleWishlist = async () => {
+    if (!user?.token) return navigate("/login");
+    
+    try {
+      const method = isInWishlist ? "DELETE" : "POST";
+      const res = await fetch(`https://localhost:7059/api/wishlist/${id}`, {
+        method,
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      
+      if (res.ok) {
+        setIsInWishlist(!isInWishlist);
+        const msg = isInWishlist 
+          ? "Видалено зі списку бажань" 
+          : "Додано до списку бажань";
+        showToast(msg);
+      } else {
+        const data = await res.json();
+        showToast(data.message || "Помилка");
+      }
     } catch {
       showToast("Помилка сервера");
     }
@@ -132,7 +173,13 @@ export default function GameDetailsPage({ user }) {
           <button className="action-btn buy" onClick={handleBuy}>Купити</button>
           <div className="cart-actions">
             <button className="action-btn add-cart" onClick={addToCart}>Додати у кошик</button>
-            <button className="action-btn wishlist-btn">♡</button>
+            <button 
+              className={`action-btn wishlist-btn ${isInWishlist ? "active" : ""}`}
+              onClick={toggleWishlist}
+              title={isInWishlist ? "Видалити зі списку бажань" : "Додати до списку бажань"}
+            >
+              {isInWishlist ? "♥" : "♡"}
+            </button>
           </div>
 
           <div className="meta-info">
