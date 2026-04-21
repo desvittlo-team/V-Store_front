@@ -91,20 +91,24 @@ export default function GamesPage() {
   return (
     <div className="store-layout">
       <div className="store-top-bar">
-        <div className="store-search">
-          <input type="text" placeholder="Пошук у Крамниці..." />
-          <img src={searchIcon} alt="search" className="icon-sm" />
-        </div>
-        <div className="store-top-right">
+        <div className="store-search-nav-container">
+          <div className="store-search-input-wrapper">
+            <input type="text" placeholder="Пошук у Крамниці..." />
+            <img src={searchIcon} alt="search" className="icon-search" />
+          </div>
           <div className="store-top-links">
             <span className="active">Каталог</span>
             <span>Новини</span>
           </div>
-          <div className="store-top-actions">
-            <button className="icon-btn-circle"><img src={wishlistIcon} alt="wishlist" /></button>
-            <button className="icon-btn-circle" onClick={() => navigate('/cart')}><img src={cartIcon} alt="cart" /></button>
-          </div>
         </div>
+        <div className="store-top-actions">
+            <button className="icon-btn-circle" onClick={() => navigate('/wishlist')}>
+              <img src={wishlistIcon} alt="wishlist" />
+            </button>
+            <button className="icon-btn-circle" onClick={() => navigate('/cart')}>
+              <img src={cartIcon} alt="cart" />
+            </button>
+          </div>
       </div>
 
       <div className="store-content">

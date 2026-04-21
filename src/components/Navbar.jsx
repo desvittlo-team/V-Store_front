@@ -80,7 +80,7 @@ export default function Navbar({ user, setUser, balance, setBalance }) {
             onMouseLeave={() => setIsCommunityOpen(false)}
           >
             <Link to="/screenshots" className={`navbar-link ${isActive("/screenshots")}`}>
-              Сообщество
+              Спільнота
             </Link>
 
             {isCommunityOpen && (
@@ -93,9 +93,6 @@ export default function Navbar({ user, setUser, balance, setBalance }) {
                 </Link>
                 <Link to="/chat" className="navbar-dropdown-item" onClick={() => setIsCommunityOpen(false)}>
                   💬 Чат
-                </Link>
-                <Link to="/wishlist" className="navbar-dropdown-item" onClick={() => setIsCommunityOpen(false)}>
-                  💝 Бажання
                 </Link>
                 {user?.role === "Admin" && (
                   <>
@@ -121,12 +118,16 @@ export default function Navbar({ user, setUser, balance, setBalance }) {
                 <img src={bellIcon} alt="notifications" onError={(e) => e.target.style.display = 'none'} />
               </button>
 
-              <div className="navbar-avatar-container">
+              <div className="navbar-avatar-container" style={{ position: "relative" }}>
                 <div className="navbar-avatar" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
                   {user.photo && user.photo !== "User.png" ? (
-                    <img src={`https://localhost:7059/avatars/${user.photo}`} alt={user.username} />
+                    <img 
+                      src={`https://localhost:7059/avatars/${user.photo}`} 
+                      alt={user.username} 
+                      onError={(e) => { e.target.src = userIcon; }}
+                    />
                   ) : (
-                    <img src={userIcon} alt="user" onError={(e) => e.target.style.display = 'none'} />
+                    <img src={userIcon} alt="user" />
                   )}
                 </div>
 

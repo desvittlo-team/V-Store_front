@@ -1,0 +1,391 @@
+.profile-layout {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 40px 40px 40px;
+  color: #fff;
+}
+
+.profile-header-container {
+  margin-bottom: 30px;
+}
+
+.profile-banner {
+  height: 240px;
+  background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop') center/cover; /* Тимчасовий банер */
+  border-radius: 12px 12px 0 0;
+}
+
+.profile-info-bar {
+  background: #00232d;
+  padding: 20px 40px;
+  border-radius: 0 0 12px 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  position: relative;
+}
+
+.profile-avatar-wrapper {
+  margin-top: -80px;
+  position: relative;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 4px solid #004252;
+  background: #001a20;
+  flex-shrink: 0;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-text-info {
+  flex-grow: 1;
+  padding-top: 10px;
+}
+
+.profile-username {
+  font-size: 28px;
+  margin: 0 0 4px 0;
+}
+
+.profile-status {
+  color: #ff4d4d;
+  font-size: 12px;
+  text-transform: lowercase;
+}
+
+.profile-bio {
+  color: #8ab4bc;
+  font-size: 13px;
+  margin-top: 16px;
+  max-width: 600px;
+  line-height: 1.4;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 10px;
+}
+
+.btn-add-friend {
+  background: #24E5C2;
+  color: #001a20;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-icon-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #004252;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-body-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 24px;
+}
+
+.profile-card {
+  background: #004252;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.transparent-card {
+  background: transparent;
+  padding: 0;
+}
+
+.card-title {
+  font-size: 18px;
+  margin: 0 0 20px 0;
+}
+
+.badges-row {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.badge-counter-box {
+  background: #002F3D;
+  padding: 16px 24px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.badge-counter-box .count {
+  display: block;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.badge-counter-box .label {
+  color: #8ab4bc;
+  font-size: 12px;
+}
+
+.badges-icons {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.badge-img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+.badge-img:hover {
+  transform: scale(1.1);
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+}
+
+.stats-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.stat-box {
+  flex: 1;
+  background: #002F3D;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.stat-box .count {
+  display: block;
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.stat-box .label {
+  color: #8ab4bc;
+  font-size: 14px;
+}
+
+.games-covers-row {
+  display: flex;
+  gap: 16px;
+}
+
+.game-cover {
+  flex: 1;
+  height: 100px;
+  background: #004252;
+  border-radius: 8px;
+}
+
+.comments-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.count-badge {
+  background: #004252;
+  color: #8ab4bc;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+.comment-input {
+  width: 100%;
+  background: #001a20;
+  border: 1px solid #004252;
+  color: #fff;
+  padding: 14px 20px;
+  border-radius: 24px;
+  margin-bottom: 24px;
+  box-sizing: border-box;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.comment-item {
+  background: #004252;
+  padding: 16px;
+  border-radius: 12px;
+  display: flex;
+  gap: 16px;
+}
+
+.comment-avatar img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.comment-content { flex: 1; }
+
+.comment-top { 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+    margin-bottom: 8px; 
+}
+
+.comment-name { 
+    font-weight: bold; 
+    font-size: 14px; 
+}
+
+.comment-date { 
+    color: #8ab4bc; 
+    font-size: 12px; 
+    flex-grow: 1; 
+}
+
+.comment-more { 
+    color: #8ab4bc; 
+    cursor: pointer; 
+}
+
+.comment-text { 
+    color: #d1e2e5; 
+    font-size: 13px; 
+    line-height: 1.5; 
+    margin: 0; 
+}
+
+.side-card { 
+    padding: 0; 
+    overflow: hidden; 
+}
+
+.level-header-box, .friends-header-box {
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.level-header-box h3, .friends-header-box h3 { margin: 0; }
+
+.level-hexagon {
+  width: 32px;
+  height: 32px;
+  background: #004252;
+  color: #24E5C2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+.side-menu { 
+    list-style: none; 
+    padding: 10px 0; 
+    margin: 0; 
+}
+
+.side-menu li {
+  padding: 12px 20px;
+  color: #8ab4bc;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.side-menu li.active { 
+    background: #004252; 
+    color: #fff; 
+    font-weight: bold; 
+}
+
+.side-menu li:hover:not(.active) { background: rgba(255,255,255,0.05); }
+.menu-count { opacity: 0.6; }
+
+.friends-list { 
+    list-style: none; 
+    padding: 10px 0; 
+    margin: 0; 
+}
+
+.friends-list li {
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.friends-list li:hover { background: rgba(255,255,255,0.05); }
+
+.friend-avatar { 
+    width: 32px; 
+    height: 32px; 
+    background: #24E5C2;
+    color: #001a20; 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-weight: bold; 
+}
+
+.friend-name { 
+    color: #fff; 
+    font-size: 13px; 
+    flex-grow: 1; 
+}
+
+.friend-level-hex {
+  width: 24px; 
+  height: 24px; 
+  font-size: 10px; 
+  background: #001a20; 
+  color: #f2c94c;
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  border: 1px solid #f2c94c; 
+  border-radius: 4px;
+}
+
+.profile-system-msg {
+  margin-top: 50px;
+  text-align: center;
+  width: 100%;
+}
+
+.profile-system-msg.loading { color: #8ab4bc; }
+.profile-system-msg.error { color: #fff; }
+
+.hidden-file-input { display: none; }

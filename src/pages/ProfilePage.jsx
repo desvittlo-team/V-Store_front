@@ -1,9 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import "../style/ProfilePage.css"; 
+import badgeFish from "../assets/badge_fish.png";
+import badgeSword from "../assets/badge_sword.png";
+import badgeHeart from "../assets/badge_heart.png";
+import badgeCard from "../assets/badge_card.png";
+import badgeGamepad from "../assets/badge_gamepad.png";
 
-// Іконки (SVG)
 const EditIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>;
-const BadgeIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#24E5C2" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>;
 
 export default function ProfilePage({ user, setUser }) {
   const navigate = useNavigate();
@@ -19,11 +23,7 @@ export default function ProfilePage({ user, setUser }) {
   const isOwnProfile = !id || (user && String(id) === String(user.id));
 
   useEffect(() => {
-    if (!user?.token) {
-      navigate("/login");
-      return;
-    }
-
+    if (!user?.token) { navigate("/login"); return; }
     const headers = { Authorization: `Bearer ${user.token}` };
     const fetchUrl = id ? `https://localhost:7059/api/profile/${id}` : "https://localhost:7059/api/profile/me";
 
@@ -47,11 +47,7 @@ export default function ProfilePage({ user, setUser }) {
     if (!file || !user?.token) return;
     const formData = new FormData();
     formData.append("file", file);
-    const res = await fetch("https://localhost:7059/api/profile/me/avatar", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${user.token}` },
-      body: formData
-    });
+    const res = await fetch("https://localhost:7059/api/profile/me/avatar", { method: "POST", headers: { Authorization: `Bearer ${user.token}` }, body: formData });
     if (res.ok) {
       const data = await res.json();
       setProfileData(prev => ({ ...prev, user: { ...prev.user, photo: data.fileName } }));
@@ -61,11 +57,7 @@ export default function ProfilePage({ user, setUser }) {
 
   const handleSaveProfile = async () => {
     if (!newUsername.trim() || !user?.token) return;
-    const res = await fetch("https://localhost:7059/api/profile/me", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.token}` },
-      body: JSON.stringify({ username: newUsername })
-    });
+    const res = await fetch("https://localhost:7059/api/profile/me", { method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.token}` }, body: JSON.stringify({ username: newUsername }) });
     if (res.ok) {
       const updated = await res.json();
       setProfileData(prev => ({ ...prev, user: updated }));
@@ -74,37 +66,49 @@ export default function ProfilePage({ user, setUser }) {
     }
   };
 
-  if (loading) return null;
-  if (!profileData?.user) return <div className="main-container" style={{color:"#fff", padding:"50px"}}>Профіль не знайдено</div>;
+  // Використовуємо класи замість інлайн-стилів для станів
+  if (loading) return <div className="profile-layout main-container"><h2 className="profile-system-msg loading">Завантаження...</h2></div>;
+  if (!profileData?.user) return <div className="profile-layout main-container"><h2 className="profile-system-msg error">Профіль не знайдено</h2></div>;
 
-  const { user: pUser, library = [], screenshots = [] } = profileData;
+  const { user: pUser, library = [] } = profileData;
 
   return (
     <div className="profile-layout main-container">
-      <div className="profile-header-banner">
-        <div className="banner-bg"></div>
-        <div className="profile-user-info-bar">
+      
+      <div className="profile-header-container">
+        <div className="profile-banner"></div>
+        
+        <div className="profile-info-bar">
           <div className={`profile-avatar-wrapper ${isOwnProfile ? 'editable' : ''}`} onClick={() => isOwnProfile && fileInputRef.current.click()}>
             <img 
               src={pUser.photo && pUser.photo !== "User.png" ? `https://localhost:7059/avatars/${pUser.photo}` : '/no-image.png'} 
               alt="avatar" 
-              className="profile-avatar-large" 
+              className="profile-avatar-img" 
               onError={(e) => e.target.src = '/no-image.png'}
             />
             {isOwnProfile && <div className="avatar-upload-overlay">📷</div>}
-            <input type="file" ref={fileInputRef} style={{display:"none"}} onChange={handleAvatarUpload} />
+            {/* Використовуємо клас для приховування інпута */}
+            <input type="file" ref={fileInputRef} className="hidden-file-input" onChange={handleAvatarUpload} />
           </div>
-          <div className="profile-name-block">
-            <h1>{pUser.username}</h1>
-            <span className="status-online">Онлайн</span>
-            <p className="status-quote">У пошуках нових пригод. Кожен новий рівень — це можливість пережити незабутні моменти...</p>
+          
+          <div className="profile-text-info">
+            <h1 className="profile-username">{pUser.username}</h1>
+            <span className="profile-status">онлайн</span>
+            <p className="profile-bio">У пошуках нових пригод! Кожен новий рівень — це можливість пережити незабутні моменти та здобути новий досвід.</p>
           </div>
-          <div className="profile-actions-block">
+
+          <div className="profile-actions">
             {isOwnProfile ? (
               <button className="btn-edit-profile" onClick={() => { setNewUsername(pUser.username); setIsEditing(true); }}>
                 <EditIcon /> Редагувати профіль
               </button>
-            ) : <button className="btn-primary">Додати в друзі</button>}
+            ) : (
+              <>
+                <button className="btn-add-friend">👤+ Додати до друзів</button>
+                <button className="btn-icon-circle">✉️</button>
+                <button className="btn-icon-circle">•••</button>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -113,66 +117,116 @@ export default function ProfilePage({ user, setUser }) {
         <div className="profile-main-col">
           <div className="profile-card">
             <h3 className="card-title">Галерея значків</h3>
-            <div className="badges-container">
-              <div className="badge-count">
+            <div className="badges-row">
+              <div className="badge-counter-box">
                 <span className="count">5</span>
                 <span className="label">Значків</span>
               </div>
-              <div className="badges-list">
-                <BadgeIcon /> <BadgeIcon /> <BadgeIcon /> <BadgeIcon />
+              <div className="badges-icons">
+                <img src={badgeFish} alt="Fish Badge" className="badge-img" />
+                <img src={badgeSword} alt="Sword Badge" className="badge-img" />
+                <img src={badgeHeart} alt="Heart Badge" className="badge-img" />
+                <img src={badgeCard} alt="Card Badge" className="badge-img" />
+                <img src={badgeGamepad} alt="Gamepad Badge" className="badge-img" />
               </div>
             </div>
           </div>
 
           <div className="profile-card">
             <h3 className="card-title">Колекція ігор</h3>
-            <div className="collection-stats">
-              <div className="stat-box"><span className="count">{library.length}</span><span className="label">Ігор</span></div>
+            <div className="stats-row">
+              <div className="stat-box"><span className="count">1234</span><span className="label">Ігор</span></div>
               <div className="stat-box"><span className="count">121</span><span className="label">DLC</span></div>
-              <div className="stat-box"><span className="count">2564</span><span className="label">Рецензії</span></div>
+              <div className="stat-box"><span className="count">2564</span><span className="label">Бажаних</span></div>
             </div>
-            <div className="collection-covers">
-              {library.slice(0, 4).map(g => (
-                <img key={g.id} src={`https://localhost:7059/images/${g.photo}`} alt={g.name} className="collection-game-cover" onError={(e) => e.target.src = '/no-image.png'} />
-              ))}
+            <div className="games-covers-row">
+              <div className="game-cover mock-nms"></div>
+              <div className="game-cover mock-nms2"></div>
+              <div className="game-cover mock-nms3"></div>
+              <div className="game-cover mock-nms4"></div>
             </div>
           </div>
           
-          {/* Блок обговорень, як на макеті */}
           <div className="profile-card">
             <h3 className="card-title">Галерея обговорень</h3>
-            <div className="mock-post">
-              <div className="post-header">👤 Fallout 4 <span>25.02.2024</span></div>
-              <p>Я грав у Nuka World DLC, коли потрапив у дитяче королівство... Це неймовірно!</p>
-              <div className="post-img-placeholder"></div>
+            
+            <div className="discussion-post">
+              <div className="post-header">
+                <div className="post-author"><span className="game-icon"></span> Fallout 4</div>
+                <div className="post-date">25.02.2024</div>
+                <div className="post-more">•••</div>
+              </div>
+              <h4 className="post-title">Освальд, обурливий, невбивний</h4>
+              <p className="post-text">Я грав у Nuka world dlc, коли потрапив у дитяче королівство, все було добре, поки я не потрапив до Освальда в кінотеатрі...</p>
+              <div className="post-actions">
+                <span>❤️ 2.5k</span> <span>💬 2.5k</span> <span>↪️ Поділитись</span>
+              </div>
+            </div>
+
+          </div>
+
+          <div className="profile-card transparent-card">
+            <div className="comments-header">
+              <h3 className="card-title">Коментарі</h3>
+              <span className="count-badge">35</span>
+            </div>
+            <input type="text" className="comment-input" placeholder="Ваш коментар..." />
+            
+            <div className="comments-list">
+              {[1, 2, 3].map((item) => (
+                <div key={item} className="comment-item">
+                  <div className="comment-avatar"><img src={pUser.photo && pUser.photo !== "User.png" ? `https://localhost:7059/avatars/${pUser.photo}` : '/no-image.png'} alt="user"/></div>
+                  <div className="comment-content">
+                    <div className="comment-top">
+                      <span className="comment-name">MrZubarik</span>
+                      <span className="comment-date">25.02.2024</span>
+                      <span className="comment-more">•••</span>
+                    </div>
+                    <p className="comment-text">Це неймовірно! Дякую за такий корисний контент! Завжди цікаво читати ваші пости, адже вони наповнені корисною інформацією.</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
+
         </div>
 
         <div className="profile-sidebar-col">
-          <div className="profile-level-card">
-            <div className="level-header"><h3>Рівень</h3><span className="level-badge">99</span></div>
-            <ul className="level-menu">
-              <li className="active">Головна <span className="count">100</span></li>
-              <li>Значки <span className="count">100</span></li>
-              <li>Ігри <span className="count">{library.length}</span></li>
-              <li>Бажане <span className="count">100</span></li>
-              <li>Обговорення <span className="count">100</span></li>
+
+          <div className="profile-card side-card">
+            <div className="level-header-box">
+              <h3>Рівень</h3>
+              <div className="level-hexagon">99</div>
+            </div>
+            <ul className="side-menu">
+              <li className="active">Головна</li>
+              <li>Значки <span className="menu-count">100</span></li>
+              <li>Ігри <span className="menu-count">100</span></li>
+              <li>Бажане <span className="menu-count">100</span></li>
+              <li>Обговорення <span className="menu-count">100</span></li>
+              <li>Скріншоти <span className="menu-count">100</span></li>
+              <li>Відео <span className="menu-count">100</span></li>
+              <li>Гайди <span className="menu-count">100</span></li>
+              <li>Рецензії <span className="menu-count">100</span></li>
             </ul>
           </div>
 
-          <div className="profile-friends-card">
-            <div className="friends-header"><h3>Друзі</h3><span className="count">{friends.length}</span></div>
-            <ul className="friends-list-compact">
+          <div className="profile-card side-card">
+            <div className="friends-header-box">
+              <h3>Друзі</h3>
+              <span className="count-badge">35</span>
+            </div>
+            <ul className="friends-list">
               {friends.slice(0, 5).map(f => (
                 <li key={f.id} onClick={() => navigate(`/profile/${f.id}`)}>
-                  <div className="avatar-mini">{f.username ? f.username[0].toUpperCase() : "?"}</div>
+                  <div className="friend-avatar">{f.username ? f.username[0].toUpperCase() : "?"}</div>
                   <span className="friend-name">{f.username}</span>
-                  <span className="friend-lvl">40</span>
+                  <div className="friend-level-hex">40</div>
                 </li>
               ))}
             </ul>
           </div>
+
         </div>
       </div>
 
