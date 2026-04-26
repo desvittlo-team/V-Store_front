@@ -2829,7 +2829,6 @@ body {
   font-weight: 400;
 }
 
-
 .navbar-link-dropdown-wrapper {
   position: relative;
   padding-bottom: 20px; 
@@ -2920,14 +2919,12 @@ body {
   color: #fff;
 }
 
-/* Розділювач */
 .dropdown-divider {
   height: 1px;
   background: #012d38;
   margin: 4px 0;
 }
 
-/* Кнопка "Вийти з акаунту" */
 .dropdown-item.logout {
   color: #ff4d4d;
 }
