@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import searchIcon from '../assets/search.png';
 import wishlistIcon from '../assets/wishlist.png';
 import cartIcon from '../assets/cart.png';
+import '../style/GameStyles.css';
 
 export default function CartPage({ user }) {
   const [cartItems, setCartItems] = useState([]);

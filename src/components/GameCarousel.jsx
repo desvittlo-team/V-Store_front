@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import '../style/GameStyles.css';
 
 export default function GameCarousel({ title, games, renderCard }) {
   const scrollRef = useRef(null);

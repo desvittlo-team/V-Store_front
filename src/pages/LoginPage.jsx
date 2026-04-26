@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { login } from "../api/auth";
 
+import '../style/Auth.css';
+
 export default function LoginPage({ setUser }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

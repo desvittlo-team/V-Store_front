@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { register } from "../api/auth";
+import '../style/Auth.css';
 
 export default function RegisterPage({ setUser }) {
   const [username, setUsername] = useState("");

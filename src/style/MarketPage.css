@@ -1,0 +1,145 @@
+.toast-notification {
+  position: fixed;
+  top: 110px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #046075;
+  border: 1px solid #49FFDE;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 8px;
+  z-index: 9999;
+  font-size: 14px;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.market-layout {
+  padding-top: 40px;
+  padding-bottom: 60px;
+}
+
+.market-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.market-title {
+  color: #fff;
+  font-size: 28px;
+  margin: 0;
+}
+
+.market-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.market-search {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #004252;
+  padding: 10px 16px;
+  border-radius: 8px;
+  width: 240px;
+}
+
+.market-search input {
+  background: transparent;
+  border: none;
+  color: #fff;
+  width: 100%;
+  outline: none;
+}
+
+.market-search .icon-sm {
+  width: 16px;
+  filter: invert(1);
+  opacity: 0.6;
+}
+
+.market-select {
+  background: #004252;
+  color: #fff;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 8px;
+  outline: none;
+  cursor: pointer;
+}
+
+.market-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 24px;
+}
+
+.market-card {
+  background: #002F3D;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: 0.2s;
+  border: 1px solid transparent;
+}
+
+.market-card:hover {
+  transform: translateY(-4px);
+  border-color: #24E5C2;
+}
+
+.market-card-img-box {
+  height: 160px;
+  background: #001f29;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.market-card-img-box img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.market-card-info {
+  padding: 16px;
+}
+
+.market-card-info h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.market-card-info .game-name {
+  color: #8ab4bc;
+  font-size: 12px;
+  margin: 0 0 16px;
+}
+
+.market-card-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.market-card-bottom .price {
+  color: #24E5C2;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.market-card-bottom .seller {
+  color: rgba(255,255,255,0.5);
+  font-size: 11px;
+}

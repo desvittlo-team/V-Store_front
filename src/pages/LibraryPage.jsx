@@ -1,5 +1,3 @@
-// pages/LibraryPage.jsx — тільки стейт і fetch, рендер — в компонентах
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -12,6 +10,8 @@ import LibrarySidebar    from '../components/library/LibrarySidebar';
 import LibraryFeed       from '../components/library/LibraryFeed';
 import LibraryCollection from '../components/library/LibraryCollection';
 import LibraryGamePage   from '../components/library/LibraryGamePage';
+
+import '../style/Library.css';
 
 const API = "https://localhost:7059";
 
@@ -72,7 +72,6 @@ export default function LibraryPage({ user }) {
         {!selectedGame ? (
           <div className="library-home-view">
 
-            {/* Топ бар з пошуком */}
             <div className="library-top-bar">
               <div className="library-search">
                 <img src={searchIcon} alt="search" className="icon-sm" />

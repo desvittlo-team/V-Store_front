@@ -333,9 +333,11 @@
 .menu-count { opacity: 0.6; }
 
 .friends-list { 
-    list-style: none; 
-    padding: 10px 0; 
-    margin: 0; 
+  list-style: none; 
+  padding: 10px 0; 
+  margin: 0; 
+  display: flex;
+  gap: 10px;
 }
 
 .friends-list li {
@@ -349,21 +351,21 @@
 .friends-list li:hover { background: rgba(255,255,255,0.05); }
 
 .friend-avatar { 
-    width: 32px; 
-    height: 32px; 
-    background: #24E5C2;
-    color: #001a20; 
-    border-radius: 50%; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    font-weight: bold; 
+  width: 32px; 
+  height: 32px; 
+  background: #24E5C2;
+  color: #001a20; 
+  border-radius: 50%; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  font-weight: bold; 
 }
 
 .friend-name { 
-    color: #fff; 
-    font-size: 13px; 
-    flex-grow: 1; 
+  color: #fff; 
+  font-size: 13px; 
+  flex-grow: 1; 
 }
 
 .friend-level-hex {

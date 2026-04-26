@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import facebookIcon from '../assets/facebook.png';
 import instagramIcon from '../assets/instagram.png';
 import xIcon from '../assets/x.png';
+import '../style/Footer.css';
 
 export default function Footer() {
   return (

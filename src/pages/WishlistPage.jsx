@@ -199,7 +199,7 @@ export default function WishlistPage({ user, onPurchase }) {
             items.map(({ id, game, addedAt }) => (
               <div key={id} className="wishlist-card">
                 <img 
-                  src={`https://localhost:7059/pics/${game.photo}`} 
+                  src={`https://localhost:7059/images/${game.photo}`} 
                   alt={game.name} 
                   className="wishlist-card-img" 
                   onError={e => e.target.src = "/no-image.png"} 

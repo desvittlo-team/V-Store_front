@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import UserList from "../components/chat/UserList";
 import PrivateChat from "../components/chat/PrivateChat";
 import GlobalChat from "../components/chat/GlobalChat";
+import '../style/ChatPage.css';
 
 const API = "https://localhost:7059/api/chat";
 

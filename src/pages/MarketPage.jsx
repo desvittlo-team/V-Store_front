@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import searchIcon from '../assets/search.png';
+import '../style/MarketPage.css';
 
 const API = "https://localhost:7059/api/market";
 
@@ -68,7 +69,7 @@ export default function MarketPage({ user, onPurchase }) {
     const data = await res.json();
     setUploading(false);
 
-    if (!res.ok) { showMsg(`❌ ${data.message}`); return; }
+    if (!res.ok) { showMsg(`${data.message}`); return; }
 
     setItems(prev => [{
       ...data,
@@ -80,18 +81,18 @@ export default function MarketPage({ user, onPurchase }) {
     setPhotoFile(null);
     setPreview(null);
     setShowForm(false);
-    showMsg("✅ Предмет виставлено!");
+    showMsg("Предмет виставлено!");
   }
 
   async function handleBuy(item) {
     if (!user?.token) { showMsg("❌ Увійдіть щоб купити"); return; }
     const res = await fetch(`${API}/${item.id}/buy`, { method: "POST", headers });
     const data = await res.json();
-    if (!res.ok) { showMsg(`❌ ${data.message}`); return; }
+    if (!res.ok) { showMsg(`${data.message}`); return; }
     setItems(prev => prev.filter(i => i.id !== item.id));
     setSelected(null);
     if (onPurchase) onPurchase();
-    showMsg(`✅ ${item.name} у вашому інвентарі!`);
+    showMsg(`${item.name} у вашому інвентарі!`);
   }
 
   async function handleDelete(id) {
@@ -108,8 +109,8 @@ export default function MarketPage({ user, onPurchase }) {
       body: JSON.stringify({ price: parseFloat(sellPrice) })
     });
     const data = await res.json();
-    if (!res.ok) { showMsg(`❌ ${data.message}`); return; }
-    showMsg("✅ Виставлено на продаж!");
+    if (!res.ok) { showMsg(`${data.message}`); return; }
+    showMsg("Виставлено на продаж!");
     setShowInventorySell(false);
     setSellPrice("");
     setSelectedInvItem(null);
@@ -130,7 +131,6 @@ export default function MarketPage({ user, onPurchase }) {
 
       {message && <div className="toast-notification">{message}</div>}
 
-      {/* Верхня панель */}
       <div className="market-top-bar">
         <h1 className="market-title">🛒 Маркет спільноти</h1>
         <div className="market-controls">
@@ -158,7 +158,6 @@ export default function MarketPage({ user, onPurchase }) {
         </div>
       </div>
 
-      {/* Форма создания (только админ) */}
       {showForm && user?.role === "Admin" && (
         <div style={{ background: "#1a1a2e", borderRadius: "12px", padding: "24px", border: "1px solid #2a2a3e", marginBottom: "24px" }}>
           <h2 style={{ color: "#fff", marginBottom: "20px", fontSize: "18px" }}>Створити предмет</h2>
@@ -198,7 +197,6 @@ export default function MarketPage({ user, onPurchase }) {
         </div>
       )}
 
-      {/* Сетка предметов */}
       {filtered.length === 0 ? (
         <div style={{ textAlign: "center", marginTop: "80px" }}>
           <div style={{ fontSize: "64px", marginBottom: "16px" }}>🛒</div>
@@ -218,7 +216,6 @@ export default function MarketPage({ user, onPurchase }) {
                   )}
                 </div>
                 <div className="market-card-info">
-                  {/* Тип предмета */}
                   <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "4px", background: typeInfo.color + "33", color: typeInfo.color, marginBottom: "6px", display: "inline-block" }}>
                     {typeInfo.label}
                   </span>
@@ -235,7 +232,6 @@ export default function MarketPage({ user, onPurchase }) {
         </div>
       )}
 
-      {/* Модальное окно предмета */}
       {selected && (
         <div className="slush-modal-overlay" onClick={() => setSelected(null)}>
           <div className="slush-modal-content" onClick={e => e.stopPropagation()}>
@@ -268,7 +264,6 @@ export default function MarketPage({ user, onPurchase }) {
         </div>
       )}
 
-      {/* Модалка продажи из инвентаря */}
       {showInventorySell && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}
           onClick={() => setShowInventorySell(false)}>

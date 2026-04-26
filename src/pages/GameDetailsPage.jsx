@@ -59,7 +59,10 @@ export default function GameDetailsPage({ user }) {
     fetch("https://localhost:7059/api/wishlist/ids", {
       headers: { Authorization: `Bearer ${user.token}` }
     })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error("Помилка сервера"); 
+        return res.json();
+      })
       .then(ids => {
         setIsInWishlist(ids.includes(parseInt(id)));
       })

@@ -4,6 +4,7 @@ import { getGames } from "../api/games";
 import searchIcon from '../assets/search.png';
 import wishlistIcon from '../assets/wishlist.png';
 import cartIcon from '../assets/cart.png';
+import '../style/GameStyles.css';
 
 export default function GamesPage() {
   const navigate = useNavigate();
