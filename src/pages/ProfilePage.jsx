@@ -24,15 +24,12 @@ export default function ProfilePage({ user, setUser }) {
   const { id } = useParams();
   const fileInputRef = useRef(null);
   
-  // Стан даних
   const [profileData, setProfileData] = useState(null);
   const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // Стан модального вікна
   const [isEditing, setIsEditing] = useState(false);
 
-  // Визначаємо, чи це власний профіль
   const isOwnProfile = !id || (user && String(id) === String(user.id));
 
   const BASE_URL = "https://localhost:7059";
@@ -58,7 +55,6 @@ export default function ProfilePage({ user, setUser }) {
       .finally(() => setLoading(false));
   }, [user, navigate, id]);
 
-  // Функція для швидкого завантаження аватара (клік по фото)
   const handleAvatarUpload = async (e) => {
     const file = e.target.files[0];
     if (!file || !user?.token) return;
@@ -83,9 +79,7 @@ export default function ProfilePage({ user, setUser }) {
     }
   };
 
-  // Колбек після збереження в модалці
   const handleProfileSaved = (updatedData) => {
-    // Очікуємо, що сервер повертає оновлений об'єкт профілю
     setProfileData(prev => ({ ...prev, ...updatedData }));
     if (setUser) setUser(prev => ({ ...prev, ...updatedData.user }));
   };
@@ -95,7 +89,6 @@ export default function ProfilePage({ user, setUser }) {
 
   const { user: pUser } = profileData;
 
-  // Динамічний стиль для фону (якщо він є в профілі)
   const bannerStyle = pUser.backgroundUrl 
     ? { backgroundImage: `url(${pUser.backgroundUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } 
     : {};
@@ -103,9 +96,7 @@ export default function ProfilePage({ user, setUser }) {
   return (
     <div className="profile-layout main-container">
       
-      {/* HEADER SECTION */}
       <div className="profile-header-container">
-        {/* Відображаємо фон, якщо він вибраний */}
         <div className="profile-banner" style={bannerStyle}></div>
         
         <div className="profile-info-bar">
@@ -126,7 +117,6 @@ export default function ProfilePage({ user, setUser }) {
           <div className="profile-text-info">
             <h1 className="profile-username">{pUser.username}</h1>
             <span className="profile-status">онлайн</span>
-            {/* ТЕПЕР БІО ДИНАМІЧНЕ */}
             <p className="profile-bio">
               {pUser.bio || "Опис профілю порожній..."}
             </p>
@@ -151,7 +141,6 @@ export default function ProfilePage({ user, setUser }) {
       <div className="profile-body-grid">
         <div className="profile-main-col">
           
-          {/* BADGES */}
           <div className="profile-card">
             <h3 className="card-title">Галерея значків</h3>
             <div className="badges-row">
@@ -169,7 +158,6 @@ export default function ProfilePage({ user, setUser }) {
             </div>
           </div>
 
-          {/* GAMES */}
           <div className="profile-card">
             <h3 className="card-title">Колекція ігор</h3>
             <div className="stats-row">
@@ -185,7 +173,6 @@ export default function ProfilePage({ user, setUser }) {
             </div>
           </div>
           
-          {/* DISCUSSIONS */}
           <div className="profile-card">
             <h3 className="card-title">Галерея обговорень</h3>
             <div className="discussion-post">
@@ -201,7 +188,6 @@ export default function ProfilePage({ user, setUser }) {
             </div>
           </div>
 
-          {/* COMMENTS - ЛОГІКА ПРИХОВАННЯ З ТЗ */}
           <div className="profile-card transparent-card">
             <div className="comments-header">
               <h3 className="card-title">Коментарі</h3>
@@ -236,7 +222,6 @@ export default function ProfilePage({ user, setUser }) {
           </div>
         </div>
 
-        {/* SIDEBAR */}
         <div className="profile-sidebar-col">
           <div className="profile-card side-card">
             <div className="level-header-box">
@@ -270,7 +255,6 @@ export default function ProfilePage({ user, setUser }) {
         </div>
       </div>
 
-      {/* MODAL */}
       {isEditing && (
         <EditProfileModal
           user={user}

@@ -7,13 +7,13 @@ import RegisterPage from "./pages/RegisterPage";
 import GamesPage from "./pages/GamesPage";
 import AdminPage from "./pages/AdminPage";
 import LibraryPage from "./pages/LibraryPage";
-import ScreenshotsPage from "./pages/ScreenshotsPage";
 import ChatPage from "./pages/ChatPage"; 
 import ProfilePage from "./pages/ProfilePage";
 import MarketPage from "./pages/MarketPage";
 import GameDetailsPage from "./pages/GameDetailsPage"; 
 import CartPage from "./pages/CartPage";
 import WishlistPage from "./pages/WishlistPage";
+import SettingsPage from "./pages/SettingsPage";
 
 export default function App() {
   const [user, setUser] = useState(() => {
@@ -54,11 +54,11 @@ export default function App() {
           <Route path="/chat" element={<ChatPage user={user} />} />
           <Route path="/cart" element={<CartPage user={user} />} />
           <Route path="/admin" element={user?.role === "Admin" ? <AdminPage user={user} /> : <Navigate to="/" />}/>
-          <Route path="/screenshots" element={<ScreenshotsPage user={user} />} />
           <Route path="/profile/:id" element={<ProfilePage user={user} setUser={setUser} />} />
           <Route path="/profile" element={<ProfilePage user={user} setUser={setUser} />} />
           <Route path="/market" element={<MarketPage user={user} onPurchase={fetchBalance} />} />
           <Route path="/wishlist" element={<WishlistPage user={user} onPurchase={fetchBalance} />} />
+          <Route path="/settings" element={<SettingsPage user={user} setUser={setUser} balance={balance} setBalance={setBalance} fetchBalance={fetchBalance} />} />
         </Routes>
       </div>
       <Footer />
