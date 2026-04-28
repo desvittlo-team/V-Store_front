@@ -722,7 +722,7 @@ body {
 
 .profile-layout {
   margin-top: 0 !important;
-  background-color: #011A20;
+  background-color: rgba(1, 26, 32, 0.2);
 }
 
 .btn-edit-profile {

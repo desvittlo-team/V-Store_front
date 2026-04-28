@@ -1,75 +1,85 @@
 import React, { useState, useRef, useEffect } from "react";
 import "../../style/EditProfileModal.css";
 
-const TABS = ["Загальне", "Аватар", "Фон", "Вітрини", "Налаштування"];
+const TABS = ["Загальне", "Аватар", "Фон", "Шапка", "Вітрини", "Налаштування"];
 
 export default function EditProfileModal({ user, profileData, onClose, onSaved }) {
-  const fileInputRef = useRef(null);
+  const fileInputRef  = useRef(null);
+  const bannerFileRef = useRef(null);
   const [activeTab, setActiveTab] = useState(0);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
+  const [saving, setSaving]       = useState(false);
+  const [error, setError]         = useState("");
 
-  // --- СТАН ДАНИХ ---
-  const [username, setUsername] = useState(profileData?.user?.username || "");
-  const [bio, setBio] = useState(profileData?.user?.bio || "");
+  const [username, setUsername]             = useState(profileData?.user?.username || "");
+  const [bio, setBio]                       = useState(profileData?.user?.bio || "");
   const [usernameStatus, setUsernameStatus] = useState("idle");
 
-  const [avatarPreview, setAvatarPreview] = useState(null);
-  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview]       = useState(null);
+  const [avatarFile, setAvatarFile]             = useState(null);
   const [selectedAvatarItem, setSelectedAvatarItem] = useState(null);
 
-  const [selectedBg, setSelectedBg] = useState(profileData?.user?.background || null);
+  const [selectedBg, setSelectedBg]         = useState(null);
+  const [selectedBanner, setSelectedBanner] = useState(null);
+  const [bannerFile, setBannerFile]         = useState(null);
+  const [bannerPreview, setBannerPreview]   = useState(null);
 
-  const [showcases, setShowcases] = useState(profileData?.showcases || []);
+  const [showcases, setShowcases]           = useState(profileData?.showcases || []);
   const [newShowcaseName, setNewShowcaseName] = useState("");
 
-  const [hideComments, setHideComments] = useState(profileData?.user?.hideComments || false);
-  const [privateLibrary, setPrivateLibrary] = useState(profileData?.user?.privateLibrary || false);
+  const [hideComments,    setHideComments]    = useState(profileData?.user?.hideComments    || false);
+  const [privateLibrary,  setPrivateLibrary]  = useState(profileData?.user?.privateLibrary  || false);
+  const [hideBadges,      setHideBadges]      = useState(profileData?.user?.hideBadges      || false);
+  const [hideGames,       setHideGames]       = useState(profileData?.user?.hideGames       || false);
+  const [hideDiscussions, setHideDiscussions] = useState(profileData?.user?.hideDiscussions || false);
+  const [hideFriends,     setHideFriends]     = useState(profileData?.user?.hideFriends     || false);
 
-  const [inventory, setInventory] = useState([]);
+  const [inventory,   setInventory]   = useState([]);
   const [bgInventory, setBgInventory] = useState([]);
 
   const BASE = "https://localhost:7059";
 
-  // Завантаження інвентаря
   useEffect(() => {
     if (!user?.token) return;
-    fetch(`${BASE}/api/inventory/me`, { 
-      headers: { Authorization: `Bearer ${user.token}` } 
+    fetch(`${BASE}/api/market/inventory/my`, {
+      headers: { Authorization: `Bearer ${user.token}` }
     })
       .then(r => r.ok ? r.json() : [])
       .then(items => {
-        setInventory(items.filter(i => i.type !== "profile_background"));
-        setBgInventory(items.filter(i => i.type === "profile_background"));
+        setInventory(items.filter(i => i.item.itemType !== "profile_background"));
+        setBgInventory(items.filter(i => i.item.itemType === "profile_background"));
       })
-      .catch(err => console.error("Inventory load failed", err));
+      .catch(console.error);
   }, [user]);
 
-  // --- ЛОГІКА ВАЛІДАЦІЇ ---
   const validateUsername = (val) => {
-    if (/^[a-zA-Z0-9_]{3,20}$/.test(val)) setUsernameStatus("ok");
-    else setUsernameStatus("error");
+    setUsernameStatus(/^[a-zA-Z0-9_]{3,20}$/.test(val) ? "ok" : "error");
   };
 
   const handleAvatarFile = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-    if (!allowed.includes(file.type)) {
-      setError("Дозволені формати: JPG, PNG, WEBP, GIF");
-      return;
+    if (!["image/jpeg","image/png","image/webp","image/gif"].includes(file.type)) {
+      setError("Дозволені формати: JPG, PNG, WEBP, GIF"); return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      setError("Максимальний розмір файлу — 5MB");
-      return;
-    }
+    if (file.size > 5 * 1024 * 1024) { setError("Максимум 5MB"); return; }
     setAvatarFile(file);
     setSelectedAvatarItem(null);
     setAvatarPreview(URL.createObjectURL(file));
     setError("");
   };
 
-  // --- ЛОГІКА ВІТРИН ---
+  const handleBannerFile = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!["image/jpeg","image/png","image/webp"].includes(file.type)) {
+      setError("Для шапки: JPG, PNG, WEBP"); return;
+    }
+    setBannerFile(file);
+    setSelectedBanner(null);
+    setBannerPreview(URL.createObjectURL(file));
+    setError("");
+  };
+
   const addShowcase = () => {
     const name = newShowcaseName.trim();
     if (!name) return;
@@ -77,74 +87,62 @@ export default function EditProfileModal({ user, profileData, onClose, onSaved }
     setNewShowcaseName("");
   };
 
-  const addItemToShowcase = (showcaseId, item) => {
-    setShowcases(prev => prev.map(s => {
-      if (s.id === showcaseId && s.items.length < 10) {
-        return { ...s, items: [...s.items, item] };
-      }
-      return s;
-    }));
-  };
-
   const removeItemFromShowcase = (showcaseId, itemId) => {
-    setShowcases(prev => prev.map(s => {
-      if (s.id === showcaseId) {
-        return { ...s, items: s.items.filter(i => i.id !== itemId) };
-      }
-      return s;
-    }));
+    setShowcases(prev => prev.map(s =>
+      s.id === showcaseId ? { ...s, items: s.items.filter(i => i.id !== itemId) } : s
+    ));
   };
 
-  // --- ЗБЕРЕЖЕННЯ ---
   const handleSave = async () => {
-    if (usernameStatus === "error") {
-      setError("Виправте помилки в імені користувача");
-      return;
-    }
-
+    if (usernameStatus === "error") { setError("Виправте ім'я користувача"); return; }
     setSaving(true);
     setError("");
-    const headers = { 
-      Authorization: `Bearer ${user.token}`,
-      "Content-Type": "application/json"
-    };
+    const h = { Authorization: `Bearer ${user.token}`, "Content-Type": "application/json" };
 
     try {
-      // 1. Аватар (якщо файл)
+      // Аватар файлом
       if (avatarFile) {
         const fd = new FormData();
         fd.append("file", avatarFile);
-        await fetch(`${BASE}/api/profile/me/avatar`, { 
-          method: "POST", 
-          headers: { Authorization: `Bearer ${user.token}` }, 
-          body: fd 
+        await fetch(`${BASE}/api/profile/me/avatar`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${user.token}` },
+          body: fd
         });
       }
 
-      // 2. Основні дані
+      // Баннер файлом
+      if (bannerFile) {
+        const fd = new FormData();
+        fd.append("file", bannerFile);
+        await fetch(`${BASE}/api/profile/me/banner`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${user.token}` },
+          body: fd
+        });
+      }
+
       const payload = {
-        username: username.trim(),
-        bio: bio.trim(),
-        avatarInventoryItemId: selectedAvatarItem?.id || null,
-        backgroundInventoryItemId: selectedBg?.id || null,
+        username:                 username.trim(),
+        bio:                      bio.trim(),
+        avatarInventoryItemId:     selectedAvatarItem?.id || null,
+        backgroundInventoryItemId: selectedBg?.id         || null,
+        bannerInventoryItemId:     selectedBanner?.id     || null,
         hideComments,
         privateLibrary,
-        showcases: showcases.map(s => ({
-          name: s.name,
-          itemIds: s.items.map(i => i.id)
-        }))
+        hideBadges,
+        hideGames,
+        hideDiscussions,
+        hideFriends,
+        showcases: showcases.map(s => ({ name: s.name, itemIds: s.items.map(i => i.id) }))
       };
 
       const res = await fetch(`${BASE}/api/profile/me`, {
-        method: "PUT",
-        headers,
-        body: JSON.stringify(payload),
+        method: "PUT", headers: h, body: JSON.stringify(payload)
       });
 
       if (!res.ok) throw new Error("Сервер відхилив зміни");
-
-      const updatedData = await res.json();
-      onSaved?.(updatedData);
+      onSaved?.(await res.json());
       onClose();
     } catch (e) {
       setError(e.message);
@@ -153,8 +151,14 @@ export default function EditProfileModal({ user, profileData, onClose, onSaved }
     }
   };
 
-  const currentAvatarUrl = avatarPreview || selectedAvatarItem?.imageUrl || 
-    (profileData?.user?.photo ? `${BASE}/avatars/${profileData.user.photo}` : "/no-image.png");
+  const currentAvatarUrl = avatarPreview
+    || (selectedAvatarItem ? `${BASE}/items/${selectedAvatarItem.item.photo}` : null)
+    || (profileData?.user?.photo ? `${BASE}/avatars/${profileData.user.photo}` : "/no-image.png");
+
+  const currentBannerUrl = bannerPreview
+    || (selectedBanner ? `${BASE}/items/${selectedBanner.item.photo}` : null)
+    || profileData?.user?.bannerUrl
+    || null;
 
   return (
     <div className="epm-overlay" onClick={onClose}>
@@ -173,12 +177,13 @@ export default function EditProfileModal({ user, profileData, onClose, onSaved }
         </div>
 
         <div className="epm-body">
-          {/* TAB 0: GENERAL */}
+
+          {/* TAB 0: ЗАГАЛЬНЕ */}
           {activeTab === 0 && (
             <div className="epm-section">
               <div className="epm-field">
                 <label>Ім'я користувача</label>
-                <input 
+                <input
                   className={`epm-input ${usernameStatus}`}
                   value={username}
                   onChange={e => { setUsername(e.target.value); validateUsername(e.target.value); }}
@@ -188,7 +193,7 @@ export default function EditProfileModal({ user, profileData, onClose, onSaved }
               </div>
               <div className="epm-field">
                 <label>Про себе</label>
-                <textarea 
+                <textarea
                   className="epm-textarea"
                   value={bio}
                   onChange={e => setBio(e.target.value)}
@@ -200,21 +205,25 @@ export default function EditProfileModal({ user, profileData, onClose, onSaved }
             </div>
           )}
 
-          {/* TAB 1: AVATAR */}
+          {/* TAB 1: АВАТАР */}
           {activeTab === 1 && (
             <div className="epm-section">
               <div className="epm-avatar-setup">
                 <div className="epm-preview-main">
-                  <img src={currentAvatarUrl} alt="Preview" />
+                  <img src={currentAvatarUrl} alt="Preview" crossOrigin="anonymous" />
                   <button onClick={() => fileInputRef.current.click()}>Завантажити фото</button>
                   <input type="file" ref={fileInputRef} hidden onChange={handleAvatarFile} accept="image/*" />
                 </div>
                 <div className="epm-inventory-sub">
-                  <p>Або виберіть предмет:</p>
+                  <p>Або виберіть GIF з інвентаря:</p>
                   <div className="epm-grid-mini">
                     {inventory.map(item => (
-                      <div key={item.id} className={`epm-item ${selectedAvatarItem?.id === item.id ? 'active' : ''}`} onClick={() => setSelectedAvatarItem(item)}>
-                        <img src={item.imageUrl} title={item.name} />
+                      <div
+                        key={item.id}
+                        className={`epm-item ${selectedAvatarItem?.id === item.id ? 'active' : ''}`}
+                        onClick={() => { setSelectedAvatarItem(item); setAvatarFile(null); setAvatarPreview(null); }}
+                      >
+                        <img src={`${BASE}/items/${item.item.photo}`} title={item.item.name} crossOrigin="anonymous" onError={e => e.target.style.display="none"} />
                       </div>
                     ))}
                   </div>
@@ -223,23 +232,75 @@ export default function EditProfileModal({ user, profileData, onClose, onSaved }
             </div>
           )}
 
-          {/* TAB 2: BACKGROUND */}
+          {/* TAB 2: ФОН */}
           {activeTab === 2 && (
             <div className="epm-section">
-              <p>Доступні фони з інвентаря:</p>
+              <p>Фон сторінки профілю з інвентаря:</p>
               <div className="epm-grid-bg">
                 {bgInventory.map(item => (
-                  <div key={item.id} className={`epm-bg-card ${selectedBg?.id === item.id ? 'active' : ''}`} onClick={() => setSelectedBg(item)}>
-                    <img src={item.imageUrl} />
-                    <span>{item.name}</span>
+                  <div
+                    key={item.id}
+                    className={`epm-bg-card ${selectedBg?.id === item.id ? 'active' : ''}`}
+                    onClick={() => setSelectedBg(item)}
+                  >
+                    <img src={`${BASE}/items/${item.item.photo}`} onError={e => e.target.style.display="none"} />
+                    <span>{item.item.name}</span>
                   </div>
                 ))}
               </div>
+              {selectedBg && (
+                <button className="epm-btn-ghost" onClick={() => setSelectedBg(null)}>Скинути фон</button>
+              )}
             </div>
           )}
 
-          {/* TAB 3: SHOWCASES */}
+          {/* TAB 3: ШАПКА */}
           {activeTab === 3 && (
+            <div className="epm-section">
+              <div className="epm-banner-preview" style={{
+                height: 120,
+                borderRadius: 8,
+                marginBottom: 16,
+                background: currentBannerUrl ? `url(${currentBannerUrl}) center/cover` : '#1a2a3a',
+                border: '1px solid rgba(255,255,255,0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                {!currentBannerUrl && <span style={{ color: '#555' }}>Попередній перегляд шапки</span>}
+              </div>
+
+              <div className="epm-field">
+                <label>Завантажити зображення шапки</label>
+                <button className="epm-btn-secondary" onClick={() => bannerFileRef.current.click()}>
+                  Вибрати файл (JPG, PNG, WEBP)
+                </button>
+                <input type="file" ref={bannerFileRef} hidden onChange={handleBannerFile} accept="image/jpeg,image/png,image/webp" />
+              </div>
+
+              <p style={{ margin: '12px 0 8px', fontSize: 13, color: '#888' }}>Або з інвентаря:</p>
+              <div className="epm-grid-bg">
+                {bgInventory.map(item => (
+                  <div
+                    key={item.id}
+                    className={`epm-bg-card ${selectedBanner?.id === item.id ? 'active' : ''}`}
+                    onClick={() => { setSelectedBanner(item); setBannerFile(null); setBannerPreview(null); }}
+                  >
+                    <img src={`${BASE}/items/${item.item.photo}`} onError={e => e.target.style.display="none"} />
+                    <span>{item.item.name}</span>
+                  </div>
+                ))}
+              </div>
+              {(selectedBanner || bannerPreview) && (
+                <button className="epm-btn-ghost" onClick={() => { setSelectedBanner(null); setBannerFile(null); setBannerPreview(null); }}>
+                  Скинути шапку
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* TAB 4: ВІТРИНИ */}
+          {activeTab === 4 && (
             <div className="epm-section">
               <div className="epm-add-showcase">
                 <input value={newShowcaseName} onChange={e => setNewShowcaseName(e.target.value)} placeholder="Назва вітрини" />
@@ -255,7 +316,7 @@ export default function EditProfileModal({ user, profileData, onClose, onSaved }
                     <div className="epm-showcase-items">
                       {s.items.map(it => (
                         <div key={it.id} className="epm-sc-item" onClick={() => removeItemFromShowcase(s.id, it.id)}>
-                          <img src={it.imageUrl} />
+                          <img src={it.imageUrl} alt="" />
                         </div>
                       ))}
                       {s.items.length < 5 && <div className="epm-sc-add-placeholder">+</div>}
@@ -266,13 +327,21 @@ export default function EditProfileModal({ user, profileData, onClose, onSaved }
             </div>
           )}
 
-          {/* TAB 4: SETTINGS */}
-          {activeTab === 4 && (
+          {/* TAB 5: НАЛАШТУВАННЯ */}
+          {activeTab === 5 && (
             <div className="epm-section">
-              <ToggleRow label="Приховати коментарі" checked={hideComments} onChange={setHideComments} />
-              <ToggleRow label="Приватна бібліотека" checked={privateLibrary} onChange={setPrivateLibrary} />
+              <p className="epm-settings-group-label">Приватність</p>
+              <ToggleRow label="Приховати коментарі"    checked={hideComments}    onChange={setHideComments} />
+              <ToggleRow label="Приватна бібліотека"    checked={privateLibrary}  onChange={setPrivateLibrary} />
+
+              <p className="epm-settings-group-label" style={{ marginTop: 20 }}>Блоки профілю</p>
+              <ToggleRow label="Сховати галерею значків"    checked={hideBadges}      onChange={setHideBadges} />
+              <ToggleRow label="Сховати колекцію ігор"      checked={hideGames}       onChange={setHideGames} />
+              <ToggleRow label="Сховати обговорення"        checked={hideDiscussions}  onChange={setHideDiscussions} />
+              <ToggleRow label="Сховати список друзів"      checked={hideFriends}      onChange={setHideFriends} />
             </div>
           )}
+
         </div>
 
         {error && <div className="epm-error-msg">{error}</div>}
