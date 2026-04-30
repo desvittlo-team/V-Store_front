@@ -8,11 +8,11 @@ const EditIcon = () => (
   </svg>
 );
 
-export default function ProfileHeader({ pUser, avatarSrc, isOwnProfile, onEditClick, onAvatarUpload }) {
+export default function ProfileHeader({ pUser, avatarSrc, bannerUrl, isOwnProfile, onEditClick, onAvatarUpload }) {
   const fileInputRef = useRef(null);
 
-  const bannerStyle = pUser.backgroundUrl
-    ? { backgroundImage: `url(${pUser.backgroundUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+  const bannerStyle = bannerUrl
+    ? { backgroundImage: `url(${bannerUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
     : {};
 
   return (

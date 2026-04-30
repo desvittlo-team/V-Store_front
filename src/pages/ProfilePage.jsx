@@ -43,11 +43,14 @@ export default function ProfilePage({ user, setUser }) {
       .finally(() => setLoading(false));
   }, [user, navigate, id]);
 
-  useEffect(() => {
+useEffect(() => {
     const pageContent = document.querySelector('.page-content');
     if (!pageContent) return;
-    const bgUrl = profileData?.user?.backgroundUrl;
-    if (bgUrl) {
+    const bgRaw = profileData?.user?.backgroundUrl;
+    if (bgRaw) {
+      const bgUrl = bgRaw.startsWith("http") 
+        ? bgRaw 
+        : `${BASE_URL}/items/${bgRaw}`;
       pageContent.style.backgroundImage     = `url(${bgUrl})`;
       pageContent.style.backgroundSize      = 'cover';
       pageContent.style.backgroundPosition  = 'center top';
@@ -57,17 +60,18 @@ export default function ProfilePage({ user, setUser }) {
     }
     return () => { pageContent.style.backgroundImage = ''; };
   }, [profileData?.user?.backgroundUrl]);
-
   if (loading)            return <div className="profile-layout main-container"><h2 className="profile-system-msg loading">Завантаження...</h2></div>;
   if (!profileData?.user) return <div className="profile-layout main-container"><h2 className="profile-system-msg error">Профіль не знайдено</h2></div>;
 
   const { user: pUser, library = [] } = profileData;
 
   const avatarSrc = (() => {
-    const photo = pUser.photo;
-    if (!photo || photo === "User.png") return "/no-image.png";
-    if (photo.startsWith("avatar_"))   return `${BASE_URL}/avatars/${photo}`;
-    return `${BASE_URL}/items/${photo}`;
+      const photo = pUser.photo;
+      if (!photo || photo === "User.png") return "/no-image.png";
+      if (photo.startsWith("http"))       return photo;
+      if (photo.startsWith("items/"))     return `${BASE_URL}/${photo}`;
+      if (photo.startsWith("avatar_"))    return `${BASE_URL}/avatars/${photo}`;
+      return `${BASE_URL}/avatars/${photo}`;
   })();
 
   const handleAvatarUpload = async (e) => {
@@ -102,6 +106,9 @@ export default function ProfilePage({ user, setUser }) {
       <ProfileHeader
         pUser={pUser}
         avatarSrc={avatarSrc}
+        bannerUrl={pUser.bannerUrl?.startsWith("http") 
+          ? pUser.bannerUrl 
+          : pUser.bannerUrl ? `${BASE_URL}/items/${pUser.bannerUrl}` : null}
         isOwnProfile={isOwnProfile}
         onEditClick={() => setIsEditing(true)}
         onAvatarUpload={handleAvatarUpload}

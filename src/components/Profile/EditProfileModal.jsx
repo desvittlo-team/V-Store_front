@@ -151,10 +151,16 @@ export default function EditProfileModal({ user, profileData, onClose, onSaved }
     }
   };
 
-  const currentAvatarUrl = avatarPreview
-    || (selectedAvatarItem ? `${BASE}/items/${selectedAvatarItem.item.photo}` : null)
-    || (profileData?.user?.photo ? `${BASE}/avatars/${profileData.user.photo}` : "/no-image.png");
-
+const currentAvatarUrl = avatarPreview
+  || (selectedAvatarItem ? `${BASE}/items/${selectedAvatarItem.item.photo}` : null)
+  || (() => {
+    const photo = profileData?.user?.photo;
+    if (!photo || photo === "User.png") return "/no-image.png";
+    if (photo.startsWith("http"))       return photo;
+    if (photo.startsWith("items/"))     return `${BASE}/${photo}`;
+    if (photo.startsWith("avatar_"))    return `${BASE}/avatars/${photo}`;
+    return `${BASE}/avatars/${photo}`;
+  })();
   const currentBannerUrl = bannerPreview
     || (selectedBanner ? `${BASE}/items/${selectedBanner.item.photo}` : null)
     || profileData?.user?.bannerUrl

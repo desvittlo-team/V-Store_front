@@ -59,7 +59,7 @@ export default function Navbar({ user, setUser, balance }) {
             <div className="navbar-avatar-container" style={{ position: "relative" }}>
               <div className="navbar-avatar" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
                 {user.photo && user.photo !== "User.png" ? (
-                  <img src={`https://localhost:7059/avatars/${user.photo}`} alt={user.username} onError={(e) => { e.target.src = userIcon; }} />
+                 <img src={`https://localhost:7059/avatars/${user.photo}`} alt={user.username} onError={(e) => { e.target.src = userIcon; }} />
                 ) : (
                   <img src={userIcon} alt="user" />
                 )}
