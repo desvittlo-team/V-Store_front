@@ -24,7 +24,7 @@ export default function GamesCard({ library = [] }) {
           <div key={g.id} className="game-cover">
             {g.photo && (
               <img
-                src={`https://localhost:7059/items/${g.photo}`}
+                src={`https://localhost:7059/images/${g.photo}`}
                 alt={g.name}
                 style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "8px" }}
                 onError={e => e.target.style.display = "none"}

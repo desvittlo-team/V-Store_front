@@ -485,3 +485,35 @@
   font-size: 12px;
   color: #a78bfa;
 }
+
+
+.epm-showcase-create { margin-bottom: 20px; }
+.epm-showcase-create-row { display: flex; gap: 8px; align-items: center; }
+.epm-select { background: #1a2a3a; color: #ccc; border: 1px solid #2a3a4a; border-radius: 6px; padding: 8px 10px; font-size: 13px; }
+.epm-showcase-type-badge { font-size: 11px; background: #1a3a5a; color: #4af; padding: 2px 8px; border-radius: 10px; }
+.epm-showcase-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.epm-showcase-head-left { display: flex; align-items: center; gap: 8px; }
+.epm-showcase-head-left h4 { margin: 0; font-size: 14px; color: #ddd; }
+.epm-btn-danger-sm { background: #3a1a1a; color: #f66; border: 1px solid #5a2a2a; border-radius: 6px; padding: 4px 10px; font-size: 12px; cursor: pointer; }
+.epm-btn-danger-sm:hover { background: #5a2a2a; }
+.epm-btn-primary { background: #1a4a7a; color: #4af; border: 1px solid #2a6aaa; border-radius: 6px; padding: 8px 14px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+.epm-btn-primary:hover { background: #2a5a8a; }
+.epm-sc-item { position: relative; }
+.epm-sc-remove-hint { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.7); color: #f66; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 10px; opacity: 0; transition: opacity 0.2s; }
+.epm-sc-item:hover .epm-sc-remove-hint { opacity: 1; }
+.epm-sc-game { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.epm-sc-game img { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; }
+.epm-sc-game span { font-size: 10px; color: #aaa; text-align: center; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.epm-illustration-box { margin-top: 8px; }
+.epm-illustration-preview { position: relative; display: inline-block; }
+.epm-illustration-preview img { max-width: 100%; max-height: 200px; border-radius: 8px; }
+.epm-illustration-remove { position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,0.7); color: #f66; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 12px; }
+.epm-illustration-upload { background: #1a2a3a; border: 2px dashed #2a4a6a; color: #4af; border-radius: 8px; padding: 20px 40px; cursor: pointer; font-size: 14px; }
+.epm-illustration-upload:hover { background: #1a3a5a; }
+.epm-picker { background: #0f1a2a; border: 1px solid #2a3a4a; border-radius: 8px; padding: 12px; margin-top: 10px; }
+.epm-picker-label { font-size: 12px; color: #888; margin-bottom: 8px; }
+.epm-picker-grid { display: flex; flex-wrap: wrap; gap: 8px; max-height: 200px; overflow-y: auto; }
+.epm-picker-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 6px; border-radius: 6px; border: 1px solid #2a3a4a; transition: background 0.2s; width: 80px; }
+.epm-picker-item:hover { background: #1a3a5a; border-color: #4af; }
+.epm-picker-item img { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; }
+.epm-picker-item span { font-size: 10px; color: #aaa; text-align: center; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

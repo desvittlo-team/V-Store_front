@@ -391,3 +391,131 @@
 .profile-system-msg.error { color: #fff; }
 
 .hidden-file-input { display: none; }
+
+.showcases-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.showcase-card {
+  background: rgba(15, 25, 40, 0.85);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.showcase-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.03);
+}
+
+.showcase-type-label {
+  font-size: 11px;
+  background: #1a3a5a;
+  color: #4af;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.showcase-card-title {
+  margin: 0;
+  font-size: 14px;
+  color: #ccc;
+  font-weight: 500;
+}
+
+/* Иллюстрация */
+.showcase-illustration {
+  width: 100%;
+}
+
+.showcase-illustration img {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Грид для скриншотов и инвентаря */
+.showcase-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+}
+
+.showcase-grid-item {
+  position: relative;
+  width: calc(20% - 7px);
+  min-width: 80px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #0a1520;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.showcase-grid-item img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  display: block;
+}
+
+.showcase-grid-caption {
+  font-size: 10px;
+  color: #888;
+  padding: 4px 6px;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Игры */
+.showcase-games {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.showcase-game-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background 0.15s;
+}
+
+.showcase-game-item:hover {
+  background: rgba(255,255,255,0.03);
+}
+
+.showcase-game-item img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.showcase-game-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.showcase-game-name {
+  font-size: 13px;
+  color: #ddd;
+}
+
+.showcase-game-gpa {
+  font-size: 11px;
+  color: #f5a623;
+}

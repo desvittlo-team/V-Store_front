@@ -10,6 +10,7 @@ import BadgesCard        from "../components/Profile/BadgesCard";
 import GamesCard         from "../components/Profile/GamesCard";
 import DiscussionsCard   from "../components/Profile/DiscussionsCard";
 import CommentsCard      from "../components/Profile/CommentsCard";
+import ShowcasesSection  from "../components/Profile/ShowcasesSection";
 
 const BASE_URL = "https://localhost:7059";
 
@@ -118,6 +119,7 @@ useEffect(() => {
         <div className="profile-main-col">
           {activePage === "main" && (
             <>
+              <ShowcasesSection userId={pUser.id} />
               {!pUser.hideBadges      && <BadgesCard />}
               {!pUser.hideGames       && <GamesCard library={library} />}
               {!pUser.hideDiscussions && <DiscussionsCard />}
