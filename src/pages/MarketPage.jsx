@@ -5,13 +5,13 @@ import '../style/MarketPage.css';
 const API = "https://localhost:7059/api/market";
 
 const ITEM_TYPES = [
-  { value: "skin", label: "🎨 Скін", color: "#e879f9" },
-  { value: "avatar", label: "👤 Аватар", color: "#7c3aed" },
-  { value: "sticker", label: "🏷️ Стікер", color: "#facc15" },
-  { value: "profile_background", label: "🖼️ Фон профілю", color: "#4ade80" },
-  { value: "game_item", label: "🎮 Предмет гри", color: "#60a5fa" },
-  { value: "collectible", label: "💎 Колекційне", color: "#f97316" },
-  { value: "other", label: "📦 Інше", color: "#94a3b8" },
+  { value: "skin", label: "Скін", color: "#e879f9" },
+  { value: "avatar", label: "Аватар", color: "#7c3aed" },
+  { value: "sticker", label: "Стікер", color: "#facc15" },
+  { value: "profile_background", label: "Фон профілю", color: "#4ade80" },
+  { value: "game_item", label: "Предмет гри", color: "#60a5fa" },
+  { value: "collectible", label: "Колекційне", color: "#f97316" },
+  { value: "other", label: "Інше", color: "#94a3b8" },
 ];
 
 function getTypeInfo(value) {
@@ -50,7 +50,7 @@ export default function MarketPage({ user, onPurchase }) {
     if (showInventorySell && user?.token) {
       fetch(`${API}/inventory/my`, { headers }).then(r => r.json()).then(setMyInventory);
     }
-  }, [showInventorySell]);
+  }, [showInventorySell, user?.token]);
 
   async function handleSell(e) {
     e.preventDefault();
@@ -85,7 +85,7 @@ export default function MarketPage({ user, onPurchase }) {
   }
 
   async function handleBuy(item) {
-    if (!user?.token) { showMsg("❌ Увійдіть щоб купити"); return; }
+    if (!user?.token) { showMsg("Увійдіть щоб купити"); return; }
     const res = await fetch(`${API}/${item.id}/buy`, { method: "POST", headers });
     const data = await res.json();
     if (!res.ok) { showMsg(`${data.message}`); return; }
@@ -159,37 +159,30 @@ export default function MarketPage({ user, onPurchase }) {
       </div>
 
       {showForm && user?.role === "Admin" && (
-        <div style={{ background: "#1a1a2e", borderRadius: "12px", padding: "24px", border: "1px solid #2a2a3e", marginBottom: "24px" }}>
-          <h2 style={{ color: "#fff", marginBottom: "20px", fontSize: "18px" }}>Створити предмет</h2>
-          <form onSubmit={handleSell} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-            <input placeholder="Назва *" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required
-              style={{ padding: "10px 14px", borderRadius: "8px", background: "#2a2a3e", border: "1px solid #333", color: "#fff", outline: "none" }} />
-            <input type="number" placeholder="Ціна ($) *" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} min="0.01" step="0.01" required
-              style={{ padding: "10px 14px", borderRadius: "8px", background: "#2a2a3e", border: "1px solid #333", color: "#fff", outline: "none" }} />
-            <select value={form.gameId} onChange={e => setForm({ ...form, gameId: e.target.value })} required
-              style={{ padding: "10px 14px", borderRadius: "8px", background: "#2a2a3e", border: "1px solid #333", color: "#fff", outline: "none" }}>
+        <div className="market-admin-panel">
+          <h2>Створити предмет</h2>
+          <form className="market-form-grid" onSubmit={handleSell}>
+            <input className="market-input" placeholder="Назва *" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
+            <input className="market-input" type="number" placeholder="Ціна ($) *" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} min="0.01" step="0.01" required />
+            <select className="market-input" value={form.gameId} onChange={e => setForm({ ...form, gameId: e.target.value })} required>
               <option value="">Виберіть гру *</option>
               {games.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
             </select>
-            <select value={form.itemType} onChange={e => setForm({ ...form, itemType: e.target.value })}
-              style={{ padding: "10px 14px", borderRadius: "8px", background: "#2a2a3e", border: "1px solid #333", color: "#fff", outline: "none" }}>
+            <select className="market-input" value={form.itemType} onChange={e => setForm({ ...form, itemType: e.target.value })}>
               {ITEM_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
-            <input placeholder="Опис" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
-              style={{ padding: "10px 14px", borderRadius: "8px", background: "#2a2a3e", border: "1px solid #333", color: "#fff", outline: "none", gridColumn: "1 / -1" }} />
-            <label style={{ gridColumn: "1 / -1", cursor: "pointer", border: "1px dashed #555", padding: "16px", borderRadius: "8px", textAlign: "center" }}>
-              {preview ? <img src={preview} alt="preview" style={{ maxHeight: "120px", borderRadius: "6px" }} />
-                : <span style={{ color: "#666" }}>📷 Фото предмета</span>}
+            <input className="market-input full-width" placeholder="Опис" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+            <label className="market-file-label">
+              {preview ? <img src={preview} alt="preview" className="preview-image" />
+                : <span>📷 Фото предмета</span>}
               <input type="file" accept="image/*" style={{ display: "none" }}
                 onChange={e => { const f = e.target.files[0]; if (f) { setPhotoFile(f); setPreview(URL.createObjectURL(f)); } }} />
             </label>
-            <div style={{ gridColumn: "1 / -1", display: "flex", gap: "10px" }}>
-              <button type="submit" disabled={uploading}
-                style={{ padding: "10px 24px", background: "#7c3aed", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer", opacity: uploading ? 0.6 : 1 }}>
+            <div className="market-form-actions">
+              <button type="submit" className="btn-primary" disabled={uploading}>
                 {uploading ? "Завантаження..." : "Створити"}
               </button>
-              <button type="button" onClick={() => { setShowForm(false); setForm({ name: "", description: "", price: "", gameId: "", itemType: "other" }); setPreview(null); }}
-                style={{ padding: "10px 24px", background: "transparent", color: "#aaa", border: "1px solid #333", borderRadius: "8px", cursor: "pointer" }}>
+              <button type="button" className="btn-cancel" onClick={() => { setShowForm(false); setForm({ name: "", description: "", price: "", gameId: "", itemType: "other" }); setPreview(null); }}>
                 Скасувати
               </button>
             </div>
@@ -198,9 +191,9 @@ export default function MarketPage({ user, onPurchase }) {
       )}
 
       {filtered.length === 0 ? (
-        <div style={{ textAlign: "center", marginTop: "80px" }}>
-          <div style={{ fontSize: "64px", marginBottom: "16px" }}>🛒</div>
-          <p style={{ color: "#aaa", fontSize: "18px" }}>Предметів не знайдено</p>
+        <div className="market-empty">
+          <div className="empty-icon">🛒</div>
+          <p>Предметів не знайдено</p>
         </div>
       ) : (
         <div className="market-grid">
@@ -216,7 +209,7 @@ export default function MarketPage({ user, onPurchase }) {
                   )}
                 </div>
                 <div className="market-card-info">
-                  <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "4px", background: typeInfo.color + "33", color: typeInfo.color, marginBottom: "6px", display: "inline-block" }}>
+                  <span className="type-badge" style={{ background: typeInfo.color + "33", color: typeInfo.color }}>
                     {typeInfo.label}
                   </span>
                   <h3>{item.name}</h3>
@@ -233,20 +226,20 @@ export default function MarketPage({ user, onPurchase }) {
       )}
 
       {selected && (
-        <div className="slush-modal-overlay" onClick={() => setSelected(null)}>
-          <div className="slush-modal-content" onClick={e => e.stopPropagation()}>
+        <div className="market-modal-overlay" onClick={() => setSelected(null)}>
+          <div className="market-modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>{selected.name}</h2>
               <button className="close-btn" onClick={() => setSelected(null)}>✕</button>
             </div>
             <div className="market-modal-body">
-              <div style={{ width: "200px", height: "200px", background: "#2a2a3e", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
+              <div className="modal-item-photo">
                 {selected.photo && selected.photo !== "default_item.png"
-                  ? <img src={`https://localhost:7059/items/${selected.photo}`} alt={selected.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => e.target.style.display = "none"} />
-                  : <span style={{ fontSize: "72px" }}>🎮</span>}
+                  ? <img src={`https://localhost:7059/items/${selected.photo}`} alt={selected.name} onError={e => e.target.style.display = "none"} />
+                  : <span>🎮</span>}
               </div>
               <div className="modal-item-details">
-                <span style={{ fontSize: "12px", padding: "3px 10px", borderRadius: "4px", background: getTypeInfo(selected.itemType).color + "33", color: getTypeInfo(selected.itemType).color, marginBottom: "8px", display: "inline-block" }}>
+                <span className="type-badge" style={{ background: getTypeInfo(selected.itemType).color + "33", color: getTypeInfo(selected.itemType).color }}>
                   {getTypeInfo(selected.itemType).label}
                 </span>
                 <p className="game-name">🎮 {selected.game.name}</p>
@@ -265,38 +258,32 @@ export default function MarketPage({ user, onPurchase }) {
       )}
 
       {showInventorySell && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}
-          onClick={() => setShowInventorySell(false)}>
-          <div style={{ background: "#1a1a2e", borderRadius: "14px", padding: "28px", width: "460px", maxWidth: "90vw" }}
-            onClick={e => e.stopPropagation()}>
-            <h2 style={{ color: "#fff", marginBottom: "20px" }}>🎒 Продати з інвентаря</h2>
+        <div className="market-modal-overlay" onClick={() => setShowInventorySell(false)}>
+          <div className="market-modal-content inventory-modal" onClick={e => e.stopPropagation()}>
+            <h2>Продати з інвентаря</h2>
             {myInventory.length === 0 ? (
-              <p style={{ color: "#666", textAlign: "center", margin: "20px 0" }}>Інвентар порожній</p>
+              <p className="inventory-empty">Інвентар порожній</p>
             ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px", marginBottom: "16px", maxHeight: "240px", overflowY: "auto" }}>
+              <div className="inventory-grid">
                 {myInventory.map(ii => {
                   const typeInfo = getTypeInfo(ii.item.itemType);
                   return (
-                    <div key={ii.id} onClick={() => setSelectedInvItem(ii.id)}
-                      style={{ background: selectedInvItem === ii.id ? "#7c3aed" : "#2a2a3e", borderRadius: "8px", padding: "10px", cursor: "pointer", border: selectedInvItem === ii.id ? "2px solid #a855f7" : "2px solid transparent", textAlign: "center" }}>
+                    <div key={ii.id} onClick={() => setSelectedInvItem(ii.id)} className={`inventory-card ${selectedInvItem === ii.id ? "selected" : ""}`}>
                       {ii.item.photo && ii.item.photo !== "default_item.png"
-                        ? <img src={`https://localhost:7059/items/${ii.item.photo}`} alt={ii.item.name} style={{ width: "100%", height: "60px", objectFit: "cover", borderRadius: "4px", marginBottom: "6px" }} onError={e => e.target.style.display = "none"} />
-                        : <div style={{ fontSize: "28px", marginBottom: "6px" }}>🎮</div>}
-                      <p style={{ color: "#fff", fontSize: "11px", margin: "0 0 2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ii.item.name}</p>
-                      <span style={{ fontSize: "10px", color: typeInfo.color }}>{typeInfo.label}</span>
+                        ? <img src={`https://localhost:7059/items/${ii.item.photo}`} alt={ii.item.name} onError={e => e.target.style.display = "none"} />
+                        : <div className="inventory-card-icon">🎮</div>}
+                      <p className="inventory-card-name">{ii.item.name}</p>
+                      <span className="inventory-card-type" style={{ color: typeInfo.color }}>{typeInfo.label}</span>
                     </div>
                   );
                 })}
               </div>
             )}
-            <input type="number" placeholder="Ваша ціна ($)" value={sellPrice} onChange={e => setSellPrice(e.target.value)} min="0.01" step="0.01"
-              style={{ width: "100%", padding: "10px 14px", borderRadius: "8px", background: "#2a2a3e", border: "1px solid #333", color: "#fff", marginBottom: "16px", boxSizing: "border-box", outline: "none" }} />
-            <button onClick={handleSellFromInventory} disabled={!selectedInvItem || !sellPrice}
-              style={{ width: "100%", padding: "12px", background: "#7c3aed", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer", marginBottom: "8px", opacity: selectedInvItem && sellPrice ? 1 : 0.4 }}>
+            <input className="market-input full-width" type="number" placeholder="Ваша ціна ($)" value={sellPrice} onChange={e => setSellPrice(e.target.value)} min="0.01" step="0.01" />
+            <button className="btn-primary full-width modal-btn" onClick={handleSellFromInventory} disabled={!selectedInvItem || !sellPrice}>
               Виставити на продаж
             </button>
-            <button onClick={() => setShowInventorySell(false)}
-              style={{ width: "100%", padding: "10px", background: "transparent", border: "1px solid #333", color: "#aaa", borderRadius: "8px", cursor: "pointer" }}>
+            <button className="btn-cancel full-width modal-btn" onClick={() => setShowInventorySell(false)}>
               Скасувати
             </button>
           </div>

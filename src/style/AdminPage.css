@@ -1,0 +1,241 @@
+.admin-page {
+  padding-top: 40px;
+  padding-bottom: 60px;
+  color: #fff;
+}
+
+.admin-header {
+  margin-bottom: 30px;
+}
+
+.admin-title {
+  font-size: 28px;
+  color: #fff;
+  margin: 0;
+}
+
+.admin-error {
+  background: rgba(255, 77, 77, 0.1) !important;
+  border-color: #ff4d4d !important;
+}
+
+.admin-content {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.admin-form-panel {
+  background: #00232d;
+  border: 1px solid #046075;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.admin-form-panel h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 20px;
+  color: #24E5C2;
+}
+
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.admin-input {
+  background: #001f29;
+  border: 1px solid #046075;
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  outline: none;
+  font-family: inherit;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: 0.2s;
+}
+
+.admin-input:focus {
+  border-color: #24E5C2;
+}
+
+.admin-input::placeholder {
+  color: #8ab4bc;
+}
+
+.admin-photo-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed #046075;
+  background: #001f29;
+  padding: 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #8ab4bc;
+  transition: 0.2s;
+  margin-bottom: 24px;
+  min-height: 80px;
+}
+
+.admin-photo-label:hover {
+  border-color: #24E5C2;
+  color: #fff;
+}
+
+.admin-preview-img {
+  width: 100%;
+  max-width: 250px;
+  max-height: 120px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.admin-form-actions {
+  display: flex;
+  gap: 16px;
+}
+
+.admin-table-container {
+  background: #00141f;
+  border: 1px solid #046075;
+  border-radius: 12px;
+  overflow-y: auto;
+  max-height: 600px; 
+}
+
+.admin-table-container::-webkit-scrollbar {
+  width: 8px;
+}
+.admin-table-container::-webkit-scrollbar-track {
+  background: #00141f;
+  border-radius: 0 12px 12px 0;
+}
+.admin-table-container::-webkit-scrollbar-thumb {
+  background: #046075;
+  border-radius: 4px;
+}
+.admin-table-container::-webkit-scrollbar-thumb:hover {
+  background: #24E5C2;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-table th {
+  background: #00232d;
+  color: #8ab4bc;
+  padding: 16px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 2px solid #046075;
+}
+
+.admin-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
+  font-size: 14px;
+}
+
+.admin-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.admin-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-id-col {
+  color: #8ab4bc;
+  font-weight: bold;
+  width: 50px;
+}
+
+.admin-name-col {
+  font-weight: bold;
+  color: #fff;
+}
+
+.admin-dev-col {
+  color: #8ab4bc;
+}
+
+.admin-rating-col {
+  font-weight: bold;
+}
+
+.admin-table-img-wrapper {
+  width: 60px;
+  height: 40px;
+  background: #001f29;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.admin-table-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.center-col {
+  text-align: center;
+}
+
+.admin-actions-col {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+}
+
+.icon-action-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid transparent;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.icon-action-btn img {
+  width: 18px;
+  height: 18px;
+  filter: brightness(0) invert(1); 
+  opacity: 0.7;
+  transition: 0.2s;
+}
+
+.icon-action-btn:hover {
+  background: rgba(36, 229, 194, 0.2);
+  border-color: #24E5C2;
+}
+
+.icon-action-btn:hover img {
+  opacity: 1;
+}
+
+.icon-action-btn.danger:hover {
+  background: rgba(255, 77, 77, 0.2);
+  border-color: #ff4d4d;
+}

@@ -149,6 +149,29 @@ export default function GamesPage() {
             <div className="col-grid">{freeGames.map(renderColCard)}</div>
           </div>
         </section>
+
+        <section className="store-section">
+          <div className="section-header">
+            <h2>Всі ігри ({games.length})</h2>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' }}>
+            {games.map(game => (
+              <div 
+                key={game.id} 
+                className="store-card vertical" 
+                onClick={() => goToGame(game.id)}
+              >
+                <img src={getImgUrl(game.photo)} alt={game.name} className="store-card-img" onError={(e) => { e.target.src = '/no-image.png'; }} />
+                <div className="store-card-info">
+                  <h3 className="store-card-title">{game.name}</h3>
+                  <div className="store-price-block">
+                    <span className="current-price">{game.price > 0 ? `${game.price}₴` : "Безкоштовно"}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );

@@ -100,10 +100,10 @@ function useProfileData(token, activeTab) {
 // ─── Sub-components ───────────────────────────────────────────────────────────
 function ToggleRow({ label, checked, onChange }) {
   return (
-    <div className="epm-toggle-row">
+    <label className="epm-toggle-row">
       <span>{label}</span>
-      <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} />
-    </div>
+      <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} className="epm-checkbox" />
+    </label>
   );
 }
 
@@ -138,7 +138,7 @@ function BgGrid({ items, selectedId, onSelect }) {
           onClick={() => onSelect(item)}
         >
           <img src={itemPhotoUrl(item.item.photo)} onError={e => (e.target.style.display = "none")} />
-          <span>{item.item.name}</span>
+          <span className="epm-bg-label">{item.item.name}</span>
         </div>
       ))}
     </div>
@@ -155,7 +155,7 @@ function ShowcasePicker({ showcase, inventory, screenshots, library, onAdd }) {
         <p className="epm-picker-label">Виберіть предмет з інвентаря:</p>
         <div className="epm-picker-grid">
           {available.length === 0
-            ? <p style={{ color: "#666" }}>Інвентар порожній</p>
+            ? <p className="epm-empty-text">Інвентар порожній</p>
             : available.map(inv => (
               <div key={inv.id} className="epm-picker-item" onClick={() => onAdd({ inventoryItemId: inv.id })}>
                 <img src={itemPhotoUrl(inv.item.photo)} onError={e => (e.target.style.display = "none")} />
@@ -175,7 +175,7 @@ function ShowcasePicker({ showcase, inventory, screenshots, library, onAdd }) {
         <p className="epm-picker-label">Виберіть скріншот:</p>
         <div className="epm-picker-grid">
           {available.length === 0
-            ? <p style={{ color: "#666" }}>Скріншотів немає</p>
+            ? <p className="epm-empty-text">Скріншотів немає</p>
             : available.map(sc => (
               <div key={sc.id} className="epm-picker-item" onClick={() => onAdd({ screenshotId: sc.id })}>
                 <img src={`${BASE}/screenshots/${sc.fileName}`} onError={e => (e.target.style.display = "none")} />
@@ -195,7 +195,7 @@ function ShowcasePicker({ showcase, inventory, screenshots, library, onAdd }) {
         <p className="epm-picker-label">Виберіть гру з бібліотеки:</p>
         <div className="epm-picker-grid">
           {available.length === 0
-            ? <p style={{ color: "#666" }}>Бібліотека порожня</p>
+            ? <p className="epm-empty-text">Бібліотека порожня</p>
             : available.map(lg => (
               <div key={lg.id} className="epm-picker-item" onClick={() => onAdd({ userGameId: lg.id })}>
                 <img src={`${BASE}/images/${lg.photo}`} onError={e => (e.target.style.display = "none")} />
@@ -418,7 +418,7 @@ export default function EditProfileModal({ user, profileData, onClose, onSaved }
                   onChange={e => handleUsernameChange(e.target.value)}
                   maxLength={20}
                 />
-                <small>Тільки латиниця, цифри та "_" (3-20 символів)</small>
+                <small className="epm-hint">Тільки латиниця, цифри та "_" (3-20 символів)</small>
               </div>
               <div className="epm-field">
                 <label>Про себе</label>
@@ -440,11 +440,11 @@ export default function EditProfileModal({ user, profileData, onClose, onSaved }
               <div className="epm-avatar-setup">
                 <div className="epm-preview-main">
                   <img src={currentAvatarUrl} alt="Preview" crossOrigin="anonymous" />
-                  <button onClick={() => fileInputRef.current.click()}>Завантажити фото</button>
+                  <button className="epm-btn-secondary" onClick={() => fileInputRef.current.click()}>Завантажити фото</button>
                   <input type="file" ref={fileInputRef} hidden onChange={handleAvatarFile} accept="image/*" />
                 </div>
                 <div className="epm-inventory-sub">
-                  <p>Або виберіть GIF з інвентаря:</p>
+                  <p className="epm-sub-label">Або виберіть GIF з інвентаря:</p>
                   <InventoryGrid
                     items={inventory}
                     selectedId={selectedAvatarItem?.id}
@@ -458,10 +458,10 @@ export default function EditProfileModal({ user, profileData, onClose, onSaved }
           {/* ── TAB 2: ФОН ── */}
           {activeTab === 2 && (
             <div className="epm-section">
-              <p>Фон сторінки профілю з інвентаря:</p>
+              <p className="epm-sub-label">Фон сторінки профілю з інвентаря:</p>
               <BgGrid items={bgInventory} selectedId={selectedBg?.id} onSelect={setSelectedBg} />
               {selectedBg && (
-                <button className="epm-btn-ghost" onClick={() => setSelectedBg(null)}>Скинути фон</button>
+                <button className="epm-btn-ghost mt-16" onClick={() => setSelectedBg(null)}>Скинути фон</button>
               )}
             </div>
           )}
@@ -470,28 +470,25 @@ export default function EditProfileModal({ user, profileData, onClose, onSaved }
           {activeTab === 3 && (
             <div className="epm-section">
               <div className="epm-banner-preview" style={{
-                height: 120, borderRadius: 8, marginBottom: 16,
-                background: currentBannerUrl ? `url(${currentBannerUrl}) center/cover` : "#1a2a3a",
-                border: "1px solid rgba(255,255,255,0.1)",
-                display: "flex", alignItems: "center", justifyContent: "center",
+                background: currentBannerUrl ? `url(${currentBannerUrl}) center/cover` : "#001a20",
               }}>
-                {!currentBannerUrl && <span style={{ color: "#555" }}>Попередній перегляд шапки</span>}
+                {!currentBannerUrl && <span className="epm-preview-hint">Попередній перегляд шапки</span>}
               </div>
               <div className="epm-field">
                 <label>Завантажити зображення шапки</label>
-                <button className="epm-btn-secondary" onClick={() => bannerFileRef.current.click()}>
+                <button className="epm-btn-secondary full-width" onClick={() => bannerFileRef.current.click()}>
                   Вибрати файл (JPG, PNG, WEBP)
                 </button>
                 <input type="file" ref={bannerFileRef} hidden onChange={handleBannerFile} accept="image/jpeg,image/png,image/webp" />
               </div>
-              <p style={{ margin: "12px 0 8px", fontSize: 13, color: "#888" }}>Або з інвентаря:</p>
+              <p className="epm-sub-label mt-16">Або з інвентаря:</p>
               <BgGrid
                 items={bgInventory}
                 selectedId={selectedBanner?.id}
                 onSelect={item => { setSelectedBanner(item); setBannerFile(null); setBannerPreview(null); }}
               />
               {(selectedBanner || bannerPreview) && (
-                <button className="epm-btn-ghost" onClick={() => { setSelectedBanner(null); setBannerFile(null); setBannerPreview(null); }}>
+                <button className="epm-btn-ghost mt-16" onClick={() => { setSelectedBanner(null); setBannerFile(null); setBannerPreview(null); }}>
                   Скинути шапку
                 </button>
               )}
@@ -502,13 +499,13 @@ export default function EditProfileModal({ user, profileData, onClose, onSaved }
           {activeTab === 4 && (
             <div className="epm-section">
               <div className="epm-showcase-create">
-                <p style={{ marginBottom: 8, color: "#aaa", fontSize: 13 }}>Створити нову вітрину:</p>
+                <p className="epm-sub-label">Створити нову вітрину:</p>
                 <div className="epm-showcase-create-row">
                   <select className="epm-select" value={newShowcaseType} onChange={e => setNewShowcaseType(e.target.value)}>
                     {SHOWCASE_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                   </select>
                   <input
-                    className="epm-input"
+                    className="epm-input flex-grow"
                     value={newShowcaseTitle}
                     onChange={e => setNewShowcaseTitle(e.target.value)}
                     placeholder="Назва вітрини..."
@@ -519,9 +516,9 @@ export default function EditProfileModal({ user, profileData, onClose, onSaved }
               </div>
 
               {showcaseLoading ? (
-                <p style={{ color: "#666", textAlign: "center", marginTop: 20 }}>Завантаження...</p>
+                <p className="epm-empty-text center mt-20">Завантаження...</p>
               ) : showcases.length === 0 ? (
-                <p style={{ color: "#555", textAlign: "center", marginTop: 20 }}>Вітрин ще немає</p>
+                <p className="epm-empty-text center mt-20">Вітрин ще немає</p>
               ) : (
                 <div className="epm-showcases-list">
                   {showcases.map(s => (
@@ -618,15 +615,20 @@ export default function EditProfileModal({ user, profileData, onClose, onSaved }
           {activeTab === 5 && (
             <div className="epm-section">
               <p className="epm-settings-group-label">Приватність</p>
-              {PRIVACY_TOGGLES.map(({ key, label }) => (
-                <ToggleRow key={key} label={label} checked={privacy[key]}
-                  onChange={val => setPrivacy(p => ({ ...p, [key]: val }))} />
-              ))}
-              <p className="epm-settings-group-label" style={{ marginTop: 20 }}>Блоки профілю</p>
-              {BLOCK_TOGGLES.map(({ key, label }) => (
-                <ToggleRow key={key} label={label} checked={privacy[key]}
-                  onChange={val => setPrivacy(p => ({ ...p, [key]: val }))} />
-              ))}
+              <div className="epm-toggles-container">
+                {PRIVACY_TOGGLES.map(({ key, label }) => (
+                  <ToggleRow key={key} label={label} checked={privacy[key]}
+                    onChange={val => setPrivacy(p => ({ ...p, [key]: val }))} />
+                ))}
+              </div>
+              
+              <p className="epm-settings-group-label mt-20">Блоки профілю</p>
+              <div className="epm-toggles-container">
+                {BLOCK_TOGGLES.map(({ key, label }) => (
+                  <ToggleRow key={key} label={label} checked={privacy[key]}
+                    onChange={val => setPrivacy(p => ({ ...p, [key]: val }))} />
+                ))}
+              </div>
             </div>
           )}
 
@@ -635,8 +637,8 @@ export default function EditProfileModal({ user, profileData, onClose, onSaved }
         {error && <div className="epm-error-msg">{error}</div>}
 
         <div className="epm-footer">
-          <button className="btn-cancel" onClick={onClose}>Скасувати</button>
-          <button className="btn-save" onClick={handleSave} disabled={saving}>
+          <button className="epm-btn-cancel" onClick={onClose}>Скасувати</button>
+          <button className="epm-btn-save" onClick={handleSave} disabled={saving}>
             {saving ? "Збереження..." : "Зберегти всі зміни"}
           </button>
         </div>
