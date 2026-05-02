@@ -269,3 +269,59 @@
 
 .epm-btn-danger-sm { background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.3); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: 0.2s; }
 .epm-btn-danger-sm:hover { background: #ff4d4d; color: #fff; }
+
+.epm-modal {
+  background: #00141f;
+  width: 650px; 
+  max-width: 90vw;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+  max-height: 800px;
+  border: 1px solid #046075;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  position: relative;
+  overflow: hidden; 
+}
+
+.epm-tabs {
+  display: flex;
+  padding: 0 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  overflow-x: auto;
+  gap: 16px;
+  flex-shrink: 0; 
+}
+
+.epm-body {
+  padding: 30px 24px; 
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.epm-body::-webkit-scrollbar {
+  width: 8px;
+}
+.epm-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.epm-body::-webkit-scrollbar-thumb {
+  background: #046075;
+  border-radius: 4px;
+}
+.epm-body::-webkit-scrollbar-thumb:hover {
+  background: #24E5C2;
+}
+
+.epm-footer {
+  display: flex; 
+  justify-content: flex-end; 
+  align-items: center; 
+  gap: 20px;
+  padding: 20px 24px; 
+  background: #001a20; 
+  border-top: 1px solid rgba(255, 255, 255, 0.05); 
+  border-radius: 0 0 12px 12px;
+  flex-shrink: 0;
+}

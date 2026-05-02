@@ -520,3 +520,34 @@
   font-size: 22px;
 }
 
+.store-all-games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); 
+  gap: 24px;
+  margin-top: 20px;
+}
+
+.store-card.grid-item {
+  width: 100%; 
+  height: auto; 
+  display: flex;
+  flex-direction: column;
+}
+
+.store-card.grid-item .store-card-img {
+  height: 160px; 
+  width: 100%;
+  object-fit: cover; 
+}
+
+.store-card.grid-item .store-card-title {
+  font-size: 16px; 
+  margin-bottom: 8px;
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+}
+
+.store-card.grid-item .store-card-info {
+  padding: 12px 16px;
+}

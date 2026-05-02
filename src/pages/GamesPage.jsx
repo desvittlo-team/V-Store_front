@@ -154,11 +154,11 @@ export default function GamesPage() {
           <div className="section-header">
             <h2>Всі ігри ({games.length})</h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' }}>
+          <div className="store-all-games-grid">
             {games.map(game => (
               <div 
                 key={game.id} 
-                className="store-card vertical" 
+                className="store-card grid-item"
                 onClick={() => goToGame(game.id)}
               >
                 <img src={getImgUrl(game.photo)} alt={game.name} className="store-card-img" onError={(e) => { e.target.src = '/no-image.png'; }} />
